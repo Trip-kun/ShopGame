@@ -17,8 +17,8 @@ echo %fileName%
 clue --continue luajit -j bit ./src/
 cd /d C:\Users\Triplapeeck\ClueSidescroller\out\
 cd /d C:\Users\Triplapeeck\ClueSidescroller\
-cp ./src/main.lua ./build/
-cp ./src/conf.lua ./build/
+cp ./src/main.lua ./lua_out/
+cp ./src/conf.lua ./lua_out/
 rm ./src/main.lua
-cd /d C:\Users\Triplapeeck\ClueSidescroller\build\
+cd /d C:\Users\Triplapeeck\ClueSidescroller\lua_out\
 7z a -tzip -r C:\Users\Triplapeeck\ClueSidescroller\out\%fileName%.love ./*

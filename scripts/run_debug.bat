@@ -1,3 +1,3 @@
 cd /d C:\Users\Triplapeeck\ClueSidescroller\
 
-lovec ./build
+lovec ./lua_out
