@@ -78,8 +78,8 @@ function splashlib.new(init)
       local ox = rain.ox
       local oy = rain.oy
 
-      local batch_w = 2 * math.ceil(love.graphics.getWidth() / sx) + 2
-      local batch_h = 2 * math.ceil(love.graphics.getHeight() / sy) + 2
+      local batch_w = 2 * math.ceil(width / sx) + 2
+      local batch_h = 2 * math.ceil(height / sy) + 2
 
       batch:clear()
 

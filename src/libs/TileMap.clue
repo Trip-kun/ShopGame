@@ -10,6 +10,7 @@ TileMap.y=10
 TileMap.data={}
 TileMap.mouse={x=-1, y=-1}
 method TileMap::initialize(x, y) {
+    self.debug=false
     self.x=x
     self.y=y
     self.sx=1
@@ -103,6 +104,9 @@ method TileMap::extend(left, right, up, down) {
         return DefaultTile
     })
 }
+method TileMap::setDebug(val) {
+    self.debug=val
+}
 method TileMap::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
     local found=false
     local foundplace={x=-1, y=-1}
@@ -131,16 +135,16 @@ method TileMap::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
             love.graphics.translate((x*24)-12+rx, (y*24)-12+ry)
             love.graphics.scale(self.data[x][y].sx, self.data[x][y].sy)
             love.graphics.draw(self.data[x][y]::getTileset(), self.data[x][y]::getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky)
-            if self.data[x][y].rect {
-                love.graphics.rectangle("line", -12, -12, 24, 24)
-            }
+            local oldColor = {love.graphics.getColor()}
+            love.graphics.setColor(0, 0, 0, 0.5)
+            love.graphics.rectangle("line", -12, -12, 24, 24)
+            love.graphics.setColor(oldColor)
             love.graphics.pop()
             }
         }
 
     }
     if found {
-    love.graphics.print("FOUND YA", 1000, 1000)
     local x, y = foundplace.x, foundplace.y
     love.graphics.push()
     print(x, y)

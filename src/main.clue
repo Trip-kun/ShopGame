@@ -81,6 +81,12 @@ if (mode=="editor") {
     method main.update(dt) {
         local x, y = love.mouse.getPosition()
         local x, y = push.toGame(x, y)
+        if (love.system.getOS()=="Android") {
+            local touches=love.touch.getTouches()
+            if #touches==0 {
+                x, y = -1, -1
+            }
+        }
         x=x || -1
         y=y || -1
         gui::update(dt, x, y)
@@ -141,18 +147,25 @@ if (mode=="editor") {
         wait.update()
         local x, y = love.mouse.getPosition()
         local x, y = push.toGame(x, y)
-        mx, my = x, y
+        if (love.system.getOS()=="Android") {
+                    local touches=love.touch.getTouches()
+                    if #touches==0 {
+                        x, y = -1, -1
+                    }
+                }
+        local x=x || -1
+        local y=y || -1
         gui::update(dt, x, y)
         GameData.Default.TileMaps.DefaultTileMap::update(dt, x, y)
     }
 
     method main.switchto() {
     gui=GUI.GUI()
+        GameData.Default.TileMaps.DefaultTileMap::setDebug(true)
     }
     method main.mousereleased(x, y, button, istouch, presses) {
             local x, y = love.mouse.getPosition()
             local x, y = push.toGame(x, y)
-
             if x && y {
                 GUI.click(x, y, button)
             }
@@ -201,10 +214,16 @@ method love.load() {
 
        }
        talkies.say("", talkies_text, {image=logo, oncomplete= fn () {
+           intro::release()
+           if (love.system.getOS()=="Android") {
+            gamestate.switch(main)
+            love.graphics.setColor(1, 1, 1, 1)
+           } else {
            splashscreen=splash({fill="rain"});
-           splashscreen.onDone = fn () { love.graphics.setColor(1, 1, 1, 1) gamestate.switch(main) intro::release() }
+           splashscreen.onDone = fn () { love.graphics.setColor(1, 1, 1, 1) gamestate.switch(main) }
 
            gamestate.switch(logo1)
+           }
        }})
 }
 

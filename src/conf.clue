@@ -1,2 +1,2 @@
-//return "editor"
-return "not_editor"
+return "editor"
+//return "not_editor"
