@@ -1,3 +1,3 @@
 # ShopGame
 
-##Personal Project Not Yet Fully Realized
+## Personal Project Not Yet Fully Realized
