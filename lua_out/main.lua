@@ -20,8 +20,92 @@ do
 	end
 end
 _modules = {
+	["assets.DefaultTileset"] = function()
+		local function generateQuad24X(x, y, tileset)
+			return love.graphics.newQuad(1+((x-1)*25), 1+((y-1)*25), 24, 24, tileset);
+		end
+		local TileMap = import("libs.TileMap");
+		local Tile = import("libs.tile");
+		return function(GameData)
+			local orderedTable = {			};
+			GameData.Default.Tiles.DefaultTileset = setmetatable({			}, {
+				__newindex = function(tbl, key, value)
+					table.insert(orderedTable, {
+						key, 
+						value
+					});
+					rawset(tbl, key, value);
+				end
+			});
+			GameData.Default.Tiles.DefaultTileset.Dirt = generateQuad24X(8, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtULGrassDR = generateQuad24X(2, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtUGrassD = generateQuad24X(3, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtURGrassDL = generateQuad24X(4, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtLGrassR = generateQuad24X(2, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtRGrassL = generateQuad24X(4, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDLGrassUR = generateQuad24X(2, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDGrassU = generateQuad24X(3, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDRGrassUL = generateQuad24X(4, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtULDarkDR = generateQuad24X(2, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtUDarkD = generateQuad24X(3, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtURDarkDL = generateQuad24X(4, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtLDarkR = generateQuad24X(2, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtRDarkL = generateQuad24X(4, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDLDarkUR = generateQuad24X(2, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDDarkU = generateQuad24X(3, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDRDarkUL = generateQuad24X(4, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.Dark = generateQuad24X(3, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkULGrassDR = generateQuad24X(2, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkUGrassD = generateQuad24X(3, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkURGrassDL = generateQuad24X(4, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkLGrassR = generateQuad24X(2, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkRGrassL = generateQuad24X(4, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDLGrassUR = generateQuad24X(2, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDGrassU = generateQuad24X(3, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDRGrassUL = generateQuad24X(4, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.Grass = generateQuad24X(3, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassULDirtDR = generateQuad24X(2+5, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassUDirtD = generateQuad24X(3+5, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassURDirtDL = generateQuad24X(4+5, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassLDirtR = generateQuad24X(2+5, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassRDirtL = generateQuad24X(4+5, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDLDirtUR = generateQuad24X(2+5, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDDirtU = generateQuad24X(3+5, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDRDirtUL = generateQuad24X(4+5, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkULDirtDR = generateQuad24X(12-5, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkUDirtD = generateQuad24X(13-5, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkURDirtDL = generateQuad24X(14-5, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkLDirtR = generateQuad24X(12-5, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkRDirtL = generateQuad24X(14-5, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDLDirtUR = generateQuad24X(12-5, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDDirtU = generateQuad24X(13-5, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDRDirtUL = generateQuad24X(14-5, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassULDarkDR = generateQuad24X(2+5, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassUDarkD = generateQuad24X(3+5, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassURDarkDL = generateQuad24X(4+5, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassLDarkR = generateQuad24X(2+5, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassRDarkL = generateQuad24X(4+5, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDLDarkUR = generateQuad24X(2+5, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDDarkU = generateQuad24X(3+5, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDRDarkUL = generateQuad24X(4+5, 9+5, GameData.Default.Images.DefaultTileset);
+			local out = {			};
+			for k, v in ipairs(orderedTable) do
+				local t = Tile();
+				t.sx = 1;
+				t.sy = 1;
+				t.id = v[(1)];
+				t.prefix = "Default";
+				t.tileset = "DefaultTileset";
+				t.tilesetPrefix = "Default";
+				t.type = "Basic_Tile";
+				table.insert(out, t);
+			end
+			GameData.Default.TileMaps.DefaultTileset = TileMap.fromTable(out);
+			GameData.Default.TileMaps.DefaultTileset.name = "DefaultTileset";
+		end;
+	end,
 	["conf"] = function()
-		return "editor";
+		return "not_editor";
 	end,
 	["libs.GameData"] = function()
 		local TileMap = import("libs.TileMap");
@@ -44,68 +128,42 @@ _modules = {
 		local function generateQuad24X(x, y, tileset)
 			return love.graphics.newQuad(1+((x-1)*25), 1+((y-1)*25), 24, 24, tileset);
 		end
-		GameData.Default.Tiles.DefaultTileset = {		};
-		GameData.Default.Tiles.DefaultTileset.Dirt01 = generateQuad24X(1, 1, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt02 = generateQuad24X(2, 1, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt03 = generateQuad24X(3, 1, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt04 = generateQuad24X(4, 1, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt05 = generateQuad24X(5, 1, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt06 = generateQuad24X(1, 2, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt07 = generateQuad24X(1, 3, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt08 = generateQuad24X(1, 4, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt09 = generateQuad24X(1, 5, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt10 = generateQuad24X(5, 2, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt11 = generateQuad24X(5, 3, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt12 = generateQuad24X(5, 4, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt13 = generateQuad24X(5, 5, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt14 = generateQuad24X(2, 5, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt15 = generateQuad24X(3, 5, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Dirt16 = generateQuad24X(4, 5, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtULGrassDR = generateQuad24X(2, 2, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtUGrassD = generateQuad24X(3, 2, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtURGrassDL = generateQuad24X(4, 2, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtLGrassR = generateQuad24X(2, 3, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtRGrassL = generateQuad24X(4, 3, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtDLGrassUR = generateQuad24X(2, 4, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtDGrassU = generateQuad24X(3, 4, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.DirtDRGrassUL = generateQuad24X(4, 4, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Grass = generateQuad24X(3, 3, GameData.Default.Images.DefaultTileset);
-		GameData.Default.Tiles.DefaultTileset.Default = GameData.Default.Tiles.DefaultTileset.Dirt;
 		GameData.Default.TileMaps = {		};
+		import("assets.DefaultTileset")(GameData);
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')] = TileMap:new(5, 5);
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')].name = 'DefaultTileMap';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(1)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(1)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(1)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(1)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(1)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(1)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(1)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(2)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(2)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(2)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(2)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(2)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(2)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(2)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(3)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(3)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(3)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(3)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(3)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(3)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(3)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(4)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(4)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(4)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(4)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(4)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(4)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(4)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(5)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(5)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(5)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(5)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(5)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(5)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(1)][(5)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(1)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(1)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(1)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(1)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(1)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(1)][('tileset')] = 'DefaultTileset';
@@ -129,13 +187,13 @@ _modules = {
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(4)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(4)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(5)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(5)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(5)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(5)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(5)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(5)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(2)][(5)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(1)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(1)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(1)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(1)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(1)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(1)][('tileset')] = 'DefaultTileset';
@@ -159,13 +217,13 @@ _modules = {
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(4)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(4)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(5)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(5)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(5)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(5)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(5)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(5)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(3)][(5)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(1)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(1)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(1)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(1)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(1)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(1)][('tileset')] = 'DefaultTileset';
@@ -189,37 +247,37 @@ _modules = {
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(4)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(4)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(5)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(5)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(5)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(5)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(5)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(5)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(4)][(5)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(1)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(1)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(1)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(1)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(1)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(1)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(1)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(2)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(2)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(2)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(2)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(2)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(2)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(2)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(3)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(3)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(3)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(3)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(3)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(3)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(3)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(4)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(4)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(4)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(4)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(4)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(4)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(4)][('tilesetPrefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)] = Tile:new();
-		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('id')] = 'Dirt01';
+		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('id')] = 'Dirt';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('prefix')] = 'Default';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('tileset')] = 'DefaultTileset';
@@ -228,10 +286,10 @@ _modules = {
 	end,
 	["libs.gamestate"] = function()
 		local gamestate = {		};
-		local currstate = {
-			name = "firstlogo"
-		};
 		log = import("libs.log");
+		local currstate = {
+			name = "initialstate"
+		};
 		function gamestate.switch(state)
 			local statename = state.name or "NONAME";
 			local currstatename = currstate.name or "NONAME";
@@ -278,7 +336,7 @@ _modules = {
 		for k, v in pairs(mathExtensions) do
 			math[(k)] = v;
 		end
-		local buttonCache = {		};
+		local clickCache = {		};
 		local GUI = Class("GUI");
 		function GUI:initialize()
 			self.children = {			};
@@ -286,13 +344,15 @@ _modules = {
 		function GUI:add(child)
 			table.insert(self.children, child);
 		end
-		function GUI:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+		function GUI:background()
 			local oldColor = {
 				love.graphics.getColor()
 			};
 			love.graphics.setColor(backgroundColor);
 			love.graphics.rectangle("fill", 0, 0, 1920, 1080);
 			love.graphics.setColor(oldColor);
+		end
+		function GUI:draw(x, y, r, sx, sy, ox, oy, kx, ky)
 			for _, v in ipairs(self.children) do
 				if v.draw then
 					v:draw(x, y, r, sx, sy, ox, oy, kx, ky);
@@ -309,11 +369,8 @@ _modules = {
 		end
 		local function click(x, y, button)
 			if button==1 then
-				table.insert(buttonCache, math.Point2D(x, y));
+				table.insert(clickCache, math.Point2D(x, y));
 			end
-		end
-		function GUI:clean()
-			buttonCache = {			};
 		end
 		local drawable = {		};
 		function drawable:initDrawable(x, y, canvas, width, height)
@@ -359,20 +416,6 @@ _modules = {
 			love.graphics.scale(self.sx, self.sy);
 			love.graphics.draw(self.textCanvas, -(self.width-(20*2))/2, -(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2, r, sx, sy, ox, oy, kx, ky);
 			love.graphics.pop();
-		end
-		function text:drawText2(x, y, r, sx, sy, ox, oy, kx, ky)
-			x = x or 0;
-			y = y or 0;
-			self.sx = self.sx or 1;
-			self.sy = self.sy or 1;
-			local a, b, c, d = love.graphics.getScissor();
-			love.graphics.push();
-			love.graphics.translate(self.x+x+20+(self.width-(20*2))/2, self.y+y+20+(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2);
-			love.graphics.scale(self.sx, self.sy);
-			love.graphics.setScissor(self.x+x+20, self.y+y+20, self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
-			love.graphics.draw(self.text, -(self.width-(20*2))/2, -(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2, r, sx, sy, ox, oy, kx, ky);
-			love.graphics.pop();
-			love.graphics.setScissor(a, b, c, d);
 		end
 		function text:updateText(text)
 			self.text:setf(text, self.width-(20*2), self.align);
@@ -457,7 +500,7 @@ _modules = {
 		end
 		function button:update(dt)
 			if self:getActive() then
-				for _, point in ipairs(buttonCache) do
+				for _, point in ipairs(clickCache) do
 					if (point.x>=self.upperLeft.x and point.x<=self.bottomRight.x and point.y>=self.upperLeft.y and point.y<=self.bottomRight.y) then
 						for _, v in ipairs(self.clickFunctions) do
 							v(self);
@@ -527,6 +570,11 @@ _modules = {
 		out.InvisibleButton = InvisibleButton;
 		out.TextBox = TextBox;
 		out.TextBoxButton = TextBoxButton;
+		out.clickCache = clickCache;
+		function GUI:clean()
+			clickCache = {			};
+			out.clickCache = clickCache;
+		end
 		return out;
 	end,
 	["libs.Item"] = function()
@@ -712,6 +760,15 @@ _modules = {
 		function Tile:getTileset()
 			return GameData[(self.prefix)].Images[(self.tileset)];
 		end
+		function Tile:cloneTile()
+			local tile = Tile();
+			tile.id = self.id;
+			tile.prefix = self.prefix;
+			tile.type = self.type;
+			tile.tileset = self.tileset;
+			tile.tilesetPrefix = self.tilesetPrefix;
+			return tile;
+		end
 		function Tile:toClue(TileMapName, TileMapPrefix, x, y)
 			local out = "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]=Tile::new()";
 			out = out .. "\n";
@@ -741,6 +798,7 @@ _modules = {
 	end,
 	["libs.TileMap"] = function()
 		local Tile = import("libs.tile");
+		local GUI = import("libs.gui");
 		local Class = require("libs.class");
 		local TileMap = Class("TileMap");
 		local dump = require("libs.dump");
@@ -764,15 +822,32 @@ _modules = {
 			for i = 1, x, 1 do
 				self.data[(i)] = {				};
 			end
+			self.clickFunctions = {			};
 		end
 		function TileMap:toClue()
-			out = "GameData['"..self.prefix.."']['TileMaps']['"..self.name.."']=TileMap::new("..self.x..","..self.y..")";
+			out = "GameData['"..self.prefix.."']['TileMaps']['"..self.name.."']=TileMap::new("..#self.data..","..#self.data[(1)]..")";
 			out = out .. "\n";
 			out = out .. "GameData['"..self.prefix.."']['TileMaps']['"..self.name.."'].name='"..self.name.."'";
 			for x = 1, #self.data, 1 do
 				for y = 1, #self.data[(1)], 1 do
-					out = out .. "\n";
-					out = out .. self.data[(x)][(y)]:toClue(self.name, self.prefix, x, y);
+					if self.data[(x)][(y)] then
+						out = out .. "\n";
+						out = out .. self.data[(x)][(y)]:toClue(self.name, self.prefix, x, y);
+					end
+				end
+			end
+			return out;
+		end
+		function TileMap:toLua()
+			out = "GameData['"..self.prefix.."']['TileMaps']['"..self.name.."']=TileMap:new("..#self.data..","..#self.data[(1)]..")";
+			out = out .. "\n";
+			out = out .. "GameData['"..self.prefix.."']['TileMaps']['"..self.name.."'].name='"..self.name.."'";
+			for x = 1, #self.data, 1 do
+				for y = 1, #self.data[(1)], 1 do
+					if self.data[(x)][(y)] then
+						out = out .. "\n";
+						out = out .. self.data[(x)][(y)]:toClue(self.name, self.prefix, x, y);
+					end
 				end
 			end
 			return out;
@@ -789,11 +864,78 @@ _modules = {
 		function TileMap:drawBatch(x, y, r, sx, sy, ox, oy, kx, ky)
 			love.graphics.draw(self.spriteBatch, x, y, r, sx, sy, ox, oy, kx, ky);
 		end
+		function TileMap:isFull()
+			
+		end
+		function TileMap.fromTable(tbl)
+			local rmvTotal = 0;
+			local out = TileMap(1, 1);
+			local secondRun = false;
+			local function isEmpty(tabl)
+				for k, v in pairs(tabl) do
+					return false;
+				end
+				return true;
+			end
+			local xRun = 1;
+			local yRun = 1;
+			repeat 
+				if (secondRun) then
+					yRun = yRun + 1;
+					xRun = xRun + 1;
+					out:extend(0, 1, 0, 1, function()
+						
+					end);
+				end
+				local rmv = {				};
+				for k, v in pairs(tbl) do
+					if out:isFull() then
+						goto continue;
+					else
+						for x = 1, xRun, 1 do
+							local needBreak = false;
+							for y = 1, yRun, 1 do
+								if (not out.data[(x)][(y)]) then
+									table.insert(rmv, k, true);
+									out.data[(x)][(y)] = v;
+									needBreak = true;
+									break;
+								end
+							end
+							if needBreak then
+								break;
+							end
+						end
+					end
+					::continue::
+				end
+				for k in pairs(rmv) do
+					rmvTotal = rmvTotal + 1;
+					tbl[(k)] = nil;
+				end
+				secondRun = true;
+			until isEmpty(tbl)
+			return out;
+		end
 		function TileMap:update(dt, x, y)
 			self.mouse = {
 				x = x, 
 				y = y
 			};
+			for x = 1, #self.data, 1 do
+				for y = 1, #self.data[(x)], 1 do
+					if (self.data[(x)][(y)]) then
+						local skip = false;
+						if (self.mouse.x>=(self.sx*(x-1)*24)+self.rx and self.mouse.x<=((x*24)*self.sx)+self.rx and self.mouse.y>=(y-1)*self.sy*24+self.ry and self.mouse.y<=((y)*self.sy*24)+self.ry) then
+							for _, point in ipairs(GUI.clickCache) do
+								for _, v in ipairs(self.clickFunctions) do
+									v(self, x, y);
+								end
+							end
+						end
+					end
+				end
+			end
 		end
 		local function extend2DArray(arr, lx, rx, dy, uy, fill)
 			if rx and rx>0 then
@@ -834,16 +976,17 @@ _modules = {
 			end
 			return arr;
 		end
-		function TileMap:extend(left, right, up, down)
-			extend2DArray(self.data, left, right, down, up, function()
-				local DefaultTile = Tile:new();
-				DefaultTile[('id')] = 'Dirt01';
-				DefaultTile[('prefix')] = 'Default';
-				DefaultTile[('type')] = 'Basic_Tile';
-				DefaultTile[('tileset')] = 'DefaultTileset';
-				DefaultTile[('tilesetPrefix')] = 'Default';
-				return DefaultTile;
-			end);
+		local DefaultTile = Tile:new();
+		DefaultTile[('id')] = 'Dirt';
+		DefaultTile[('prefix')] = 'Default';
+		DefaultTile[('type')] = 'Basic_Tile';
+		DefaultTile[('tileset')] = 'DefaultTileset';
+		DefaultTile[('tilesetPrefix')] = 'Default';
+		function TileMap:newBasicTile()
+			return DefaultTile:cloneTile();
+		end
+		function TileMap:extend(left, right, up, down, func)
+			extend2DArray(self.data, left, right, down, up, func or self.newBasicTile);
 		end
 		function TileMap:setDebug(val)
 			self.debug = val;
@@ -854,57 +997,67 @@ _modules = {
 				x = -1, 
 				y = -1
 			};
+			local sx = sx or 1;
+			local sy = sy or 1;
+			self.sx = sx;
+			self.sy = sy;
+			self.rx = rx;
+			self.ry = ry;
 			for x = 1, #self.data, 1 do
 				for y = 1, #self.data[(x)], 1 do
-					local skip = false;
-					if (self.mouse.x>=(x-1)*24+rx and self.mouse.x<=(x*24)+rx and self.mouse.y>=(y-1)*24+ry and self.mouse.y<=((y)*24)+ry) then
-						if (found~=true) then
-							found = true;
-							foundplace = {
-								x = x, 
-								y = y
-							};
-							skip = true;
-							if not self.data[(x)][(y)].tween then
-								self.data[(x)][(y)].rect = true;
-								self.data[(x)][(y)].tween = flux.to(self.data[(x)][(y)], 0.5, {
-									sx = 1.2, 
-									sy = 1.2
-								});
+					if (self.data[(x)][(y)]) then
+						local skip = false;
+						if (self.mouse.x>=(sx*(x-1)*24)+rx and self.mouse.x<=((x*24)*sx)+rx and self.mouse.y>=(y-1)*24+ry and self.mouse.y<=((y)*24)+ry) then
+							if (found~=true) then
+								found = true;
+								foundplace = {
+									x = x, 
+									y = y
+								};
+								skip = true;
+								if not self.data[(x)][(y)].tween then
+									self.data[(x)][(y)].rect = true;
+									self.data[(x)][(y)].tween = flux.to(self.data[(x)][(y)], 0.5, {
+										sx = 1.2, 
+										sy = 1.2
+									});
+								end
 							end
+						elseif (self.data[(x)][(y)].tween) then
+							self.data[(x)][(y)].rect = false;
+							self.data[(x)][(y)].tween:stop();
+							self.data[(x)][(y)].tween = nil;
+							self.data[(x)][(y)].sx = 1;
+							self.data[(x)][(y)].sy = 1;
 						end
-					elseif (self.data[(x)][(y)].tween) then
-						self.data[(x)][(y)].rect = false;
-						self.data[(x)][(y)].tween:stop();
-						self.data[(x)][(y)].tween = nil;
-						self.data[(x)][(y)].sx = 1;
-						self.data[(x)][(y)].sy = 1;
-					end
-					if not skip then
-						love.graphics.push();
-						love.graphics.translate((x*24)-12+rx, (y*24)-12+ry);
-						love.graphics.scale(self.data[(x)][(y)].sx, self.data[(x)][(y)].sy);
-						love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky);
-						local oldColor = {
-							love.graphics.getColor()
-						};
-						love.graphics.setColor(0, 0, 0, 0.5);
-						love.graphics.rectangle("line", -12, -12, 24, 24);
-						love.graphics.setColor(oldColor);
-						love.graphics.pop();
+						if not skip then
+							love.graphics.push();
+							love.graphics.translate((x*24)-12+rx, (y*24)-12+ry);
+							love.graphics.scale(self.data[(x)][(y)].sx, self.data[(x)][(y)].sy);
+							love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky);
+							local oldColor = {
+								love.graphics.getColor()
+							};
+							love.graphics.setColor(0, 0, 0, 0.5);
+							love.graphics.rectangle("line", -12, -12, 24, 24);
+							love.graphics.setColor(oldColor);
+							love.graphics.pop();
+						end
 					end
 				end
 			end
 			if found then
 				local x, y = foundplace.x, foundplace.y;
 				love.graphics.push();
-				print(x, y);
 				love.graphics.translate((x*24)-12+rx, (y*24)-12+ry);
 				love.graphics.scale(self.data[(x)][(y)].sx, self.data[(x)][(y)].sy);
 				love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky);
 				love.graphics.rectangle("line", -12, -12, 24, 24);
 				love.graphics.pop();
 			end
+		end
+		function TileMap:onClick(func)
+			table.insert(self.clickFunctions, func);
 		end
 		function TileMap:loadEdits(newdata, first)
 			if type(self.data[(1)])~="table" and not first then
@@ -1122,17 +1275,61 @@ _modules = {
 				end
 			end
 		else
+			local tile;
 			local gui;
+			tileset = {			};
 			local move = 0;
 			local mx, my = -1, -1;
+			tileset.switched = false;
+			tileset.name = "TILESET";
+			function tileset.draw()
+				local self = tileset;
+				push:start();
+				self.gui:background();
+				self.map:draw(20, 20);
+				self.gui:draw();
+				push:finish();
+			end
+			function tileset.update(dt)
+				local self = tileset;
+				local x, y = love.mouse.getPosition();
+				local x, y = push.toGame(x, y);
+				if (love.system.getOS()=="Android") then
+					local touches = love.touch.getTouches();
+					if #touches==0 then
+						x, y = -1, -1;
+					end
+				end
+				local x = x or -1;
+				local y = y or -1;
+				self.gui:update(dt, x, y);
+				self.map:update(dt, x, y);
+				self.gui:clean();
+			end
+			function tileset.switchto()
+				if (not tileset.switched) then
+					local self = tileset;
+					self.map = GameData.Default.TileMaps.DefaultTileset;
+					self.button = GUI.TextBoxButton(240*2, 0, {
+						0, 
+						0, 
+						1, 
+						1
+					}, 1920-(240*4), 100, 36, "Tilemap Editor", true);
+					self.button:onClick(function(self, x, y)
+						gamestate.switch(main);
+					end);
+					self.gui = GUI.GUI();
+					self.gui:add(self.button);
+					GameData.Default.TileMaps.DefaultTileset:setDebug(true);
+				end
+				tileset.switched = true;
+			end
 			function main.draw()
 				push:start();
-				love.graphics.print("Hello World!");
-				local r, g, b, a = love.graphics.getColor();
+				gui:background();
 				GameData.Default.TileMaps.DefaultTileMap:draw(20, 20);
-				love.graphics.setColor(1, 0, 1, 1);
-				love.graphics.rectangle("fill", mx, my, 24, 24);
-				love.graphics.setColor(r, g, b, a);
+				gui:draw();
 				push:finish();
 			end
 			function main.update(dt)
@@ -1149,10 +1346,32 @@ _modules = {
 				local y = y or -1;
 				gui:update(dt, x, y);
 				GameData.Default.TileMaps.DefaultTileMap:update(dt, x, y);
+				gui:clean();
 			end
+			main.switched = false;
 			function main.switchto()
-				gui = GUI.GUI();
-				GameData.Default.TileMaps.DefaultTileMap:setDebug(true);
+				if (not main.switched) then
+					tile = GameData.Default.TileMaps.DefaultTileMap:newBasicTile();
+					local textboxbutton = GUI.TextBoxButton(240*2, 0, {
+						0, 
+						0, 
+						1, 
+						1
+					}, 1920-(240*4), 100, 36, "Tileset Picker", true);
+					textboxbutton:onClick(function(self, x, y)
+						gamestate.switch(tileset);
+					end);
+					gui = GUI.GUI();
+					gui:add(textboxbutton);
+					GameData.Default.TileMaps.DefaultTileMap:setDebug(true);
+					GameData.Default.TileMaps.DefaultTileMap:onClick(function(self, x, y)
+						self.data[(x)][(y)] = tile:cloneTile();
+					end);
+					GameData.Default.TileMaps.DefaultTileset:onClick(function(self, x, y)
+						tile = self.data[(x)][(y)]:cloneTile();
+					end);
+				end
+				main.switched = true;
 			end
 			function main.mousereleased(x, y, button, istouch, presses)
 				local x, y = love.mouse.getPosition();
@@ -1162,6 +1381,9 @@ _modules = {
 				end
 			end
 		end
+		function love.quit()
+			log.info(GameData[('Default')][('TileMaps')][('DefaultTileMap')]:toLua());
+		end
 		function love.load()
 			love.mouse.setVisible(true);
 			loadLibraries();
@@ -1170,9 +1392,7 @@ _modules = {
 			newData[(1)] = {			};
 			newData[(1)][(5)] = Tile:new();
 			newData[(1)][(5)].id = "DirtULGrassDR";
-			GameData.Default.TileMaps.DefaultTileMap:loadEdits(newData);
-			GameData.Default.TileMaps.DefaultTileMap:prepare(GameData.Default.Images.DefaultTileset);
-			GameData.Default.TileMaps.DefaultTileMap:extend(15, 15, 10, 10);
+			GameData.Default.TileMaps.DefaultTileMap:extend(2, 2, 2, 2);
 			Item.loadSubclasses();
 			Weapon = import("libs.Weapon");
 			local FirstWeapon = Weapon:new();
@@ -1197,9 +1417,9 @@ _modules = {
 			intro:play();
 			local talkies_text = "";
 			if (mode=="editor") then
-				talkies_text = "Stardew Clone Tileset Editor\nBy Trip-kun\nGithub: https://github.com/Trip-kun/";
+				talkies_text = "Shop Game Thing Tileset Editor\nBy Trip-kun\nGithub: https://github.com/Trip-kun/";
 			else
-				talkies_text = "Stardew Clone\nBy Trip-kun\nGithub: https://github.com/Trip-kun/";
+				talkies_text = "Shop Game Thing\nBy Trip-kun\nGithub: https://github.com/Trip-kun/";
 			end
 			talkies.say("", talkies_text, {
 				image = logo, 

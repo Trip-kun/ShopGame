@@ -129,17 +129,68 @@ if (mode=="editor") {
 
     }
 } else {
+    local tile
     local gui
+    tileset={}
     local move=0
     local mx, my = -1, -1
+    tileset.switched=false
+    tileset.name="TILESET"
+    method tileset.draw() {
+        local self = tileset
+        push::start()
+            self.gui::background()
+            self.map::draw(20, 20)
+            self.gui::draw()
+
+            //love.graphics.print("Hello World")
+        push::finish()
+
+    }
+    method tileset.update(dt) {
+        local self = tileset
+        local x, y = love.mouse.getPosition()
+        local x, y = push.toGame(x, y)
+        if (love.system.getOS()=="Android") {
+                    local touches=love.touch.getTouches()
+                    if #touches==0 {
+                        x, y = -1, -1
+                    }
+                }
+        local x=x || -1
+        local y=y || -1
+        self.gui::update(dt, x, y)
+        self.map::update(dt, x, y)
+        self.gui::clean()
+    }
+    method tileset.switchto() {
+        if (!tileset.switched) {
+
+            local self = tileset
+            self.map=GameData.Default.TileMaps.DefaultTileset
+            self.button=GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tilemap Editor", true)
+
+                        self.button::onClick(fn (self, x, y) {
+                            gamestate.switch(main)
+
+
+                        })
+                self.gui=GUI.GUI()
+                self.gui::add(self.button)
+                    GameData.Default.TileMaps.DefaultTileset::setDebug(true)
+        }
+        tileset.switched=true
+    }
     method main.draw() {
         push::start()
-        love.graphics.print("Hello World!")
-        local r, g, b, a = love.graphics.getColor()
+        //love.graphics.print("Hello World!")
+        //local r, g, b, a = love.graphics.getColor()
+        gui::background()
         GameData.Default.TileMaps.DefaultTileMap::draw(20, 20)
-        love.graphics.setColor(1, 0, 1, 1)
-        love.graphics.rectangle("fill", mx, my, 24, 24)
-        love.graphics.setColor(r, g, b, a)
+        gui::draw()
+        //love.graphics.setColor(1, 0, 1, 1)
+        //love.graphics.rectangle("fill", mx, my, 24, 24)
+        //love.graphics.setColor(r, g, b, a)
         push::finish()
     }
 
@@ -157,11 +208,30 @@ if (mode=="editor") {
         local y=y || -1
         gui::update(dt, x, y)
         GameData.Default.TileMaps.DefaultTileMap::update(dt, x, y)
+        gui::clean()
     }
-
+    main.switched=false
     method main.switchto() {
+        if (!main.switched) {
+        tile=GameData.Default.TileMaps.DefaultTileMap::newBasicTile()
+                local textboxbutton=GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tileset Picker", true)
+
+            textboxbutton::onClick(fn (self, x, y) {
+                gamestate.switch(tileset)
+
+
+            })
     gui=GUI.GUI()
+    gui::add(textboxbutton)
         GameData.Default.TileMaps.DefaultTileMap::setDebug(true)
+        GameData.Default.TileMaps.DefaultTileMap::onClick(fn (self, x, y) {
+            self.data[x][y]=tile::cloneTile()
+        })
+        GameData.Default.TileMaps.DefaultTileset::onClick(fn (self, x, y) {
+                    tile=self.data[x][y]::cloneTile()
+                })
+        }
+        main.switched=true
     }
     method main.mousereleased(x, y, button, istouch, presses) {
             local x, y = love.mouse.getPosition()
@@ -172,7 +242,9 @@ if (mode=="editor") {
 
         }
 }
-
+method love.quit() {
+log.info(GameData['Default']['TileMaps']['DefaultTileMap']::toLua())
+}
 //Called Once Before the main love.run loop
 method love.load() {
         love.mouse.setVisible(true)
@@ -182,9 +254,9 @@ method love.load() {
         newData[1]={}
         newData[1][5]=Tile::new()
         newData[1][5].id="DirtULGrassDR"
-        GameData.Default.TileMaps.DefaultTileMap::loadEdits(newData)
-        GameData.Default.TileMaps.DefaultTileMap::prepare(GameData.Default.Images.DefaultTileset)
-        GameData.Default.TileMaps.DefaultTileMap::extend(15, 15, 10, 10)
+        //GameData.Default.TileMaps.DefaultTileMap::loadEdits(newData)
+        //GameData.Default.TileMaps.DefaultTileMap::prepare(GameData.Default.Images.DefaultTileset)
+        GameData.Default.TileMaps.DefaultTileMap::extend(2, 2, 2, 2)
         Item.loadSubclasses()
         global Weapon = import("libs.Weapon")
         local FirstWeapon = Weapon::new()
@@ -196,7 +268,8 @@ method love.load() {
         //log.info(dump.dump2(WeaponData))
         //log.info(GameData.Default.TileMaps.DefaultTileMap::toClue())
         //log.info(dump.dump2(Item.fromJSON(WeaponData)))
-
+        //GameData.Default.TileMaps.DefaultTileMap=GameData.Default.TileMaps.DefaultTileset
+        //log.info(GameData.Default.TileMaps.DefaultTileMap::toClue())
         talkies.optionCharacter=""
         talkies.padding=0
         talkies.backgroundColor={0, 0, 0, 0}
@@ -207,10 +280,10 @@ method love.load() {
        intro::play()
        local talkies_text = ""
        if (mode=="editor") {
-        talkies_text="Stardew Clone Tileset Editor\nBy Trip-kun\nGithub: https://github.com/Trip-kun/"
+        talkies_text="Shop Game Thing Tileset Editor\nBy Trip-kun\nGithub: https://github.com/Trip-kun/"
 
        } else {
-        talkies_text="Stardew Clone\nBy Trip-kun\nGithub: https://github.com/Trip-kun/"
+        talkies_text="Shop Game Thing\nBy Trip-kun\nGithub: https://github.com/Trip-kun/"
 
        }
        talkies.say("", talkies_text, {image=logo, oncomplete= fn () {

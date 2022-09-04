@@ -1,11 +1,16 @@
+//IMPORTS OF RELEVANT LIBRARIES
 local flux = require("libs.flux")
 local dump=require("libs.dump")
 local Class = require("libs.class")
 local mathExtensions = import("libs.Math")
+//Used to cache fonts to avoid doubling up on identical fonts
 local fontCache={}
 fontCache[12]=love.graphics.newFont(12)
 fontCache[14]=love.graphics.newFont(14)
 local backgroundColor={0.2, 0.2, 0.2, 1}
+//Gets a font based on font-size.
+//If not already found in the cache, creates and adds the fonts to the cache before returning the font.
+//If found in the cache, simply return font from the cache.
 method fontCache::getFont(num) {
 
     if (!fontCache[num]) {
@@ -14,34 +19,52 @@ method fontCache::getFont(num) {
     }
     return fontCache[num]
 }
+//import math extensions into the global lua math library
 for k, v of mathExtensions {
     math[k]=v
 }
+//Used to allow multiple sources to use data from a click (sourced from love.mousereleased)
+//Cleared at the end of every love.update
+//Data is stored in the form of clickCache[index]={x=x, y=y}
+local clickCache={}
 
-local buttonCache={}
-
+//GUI is a user interface holder class, designed for several purposes.
+//1. Manage and update the click cache
+//2. Set the background color without interfering with PUSH library
+//3. Manage several GUI elements, updating and drawing them as a group
 local GUI = Class("GUI")
 
+//Method called upon GUI() or GUI::new()
 method GUI::initialize() {
     self.children={}
 }
-
+//Used to add a GUI element to an instance of GUI
 method GUI::add(child) {
     table.insert(self.children, child)
 }
-
+//Used each frame to draw the background color.
+method GUI::background() {
+        //Backup existing graphics color
+        local oldColor={love.graphics.getColor()}
+        //Change color to background color
+        love.graphics.setColor(backgroundColor)
+        //Draw background color using a "fill" rectangle
+        love.graphics.rectangle("fill", 0, 0, 1920, 1080)
+        //Restore existing graphics color
+        love.graphics.setColor(oldColor)
+}
+//Used each frame to draw the child GUI elements
 method GUI::draw(x, y, r, sx, sy, ox, oy, kx, ky) {
-    local oldColor={love.graphics.getColor()}
-    love.graphics.setColor(backgroundColor)
-    love.graphics.rectangle("fill", 0, 0, 1920, 1080)
-    love.graphics.setColor(oldColor)
     for _, v in self.children {
         if v.draw {
             v::draw(x, y, r, sx, sy, ox, oy, kx, ky)
         }
     }
 }
-
+//Used each update frame to update the child GUI elements
+//Param dt: deltaTime passed from love.update
+//Param x: current x position of the mouse, should be -1 if mouse is not currently available
+//Param y: current y position of the mouse, should be -1 if mouse is not currently available
 method GUI::update(dt, x, y) {
     flux.update(dt)
     for _, v in self.children {
@@ -50,22 +73,32 @@ method GUI::update(dt, x, y) {
             }
         }
 }
+//TODO: Update to support responding to different mouse buttons
+//Used to insert into the clickCache
+//Param x: current x position of the mouse. Should not be called if mouse is not currently available
+//Param y: current y position of the mouse. Should not be called if mouse is not currently available
+//Param button: Mouse button index (e.g. 1=leftMouseButton). Only will respond if button=1.
 
 local fn click(x, y, button) {
 if button==1 {
-    table.insert(buttonCache, math.Point2D(x, y))
+    table.insert(clickCache, math.Point2D(x, y))
 }
 
 }
 
-method GUI::clean() {
-    buttonCache={}
-}
 
 
 
+//Represents a GUI element with an internal (love) Drawable element.
 local drawable={}
-
+//Should be called within an implementing class's init function
+//Should NOT be called within an implementing class's init function if used by another mixin
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param canvas (bool==true and canvas==true): an internal canvas will be created based off of the width and height parameters
+//Param canvas (bool==false || (bool==true && canvas==false): the drawable will be set the the value of canvas
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
 method drawable::initDrawable(x, y, canvas, width, height) {
     self.x=x
     self.y=y
@@ -78,14 +111,25 @@ method drawable::initDrawable(x, y, canvas, width, height) {
         self.drawable=canvas
     }
 }
-
+//Used to draw the internal drawable.
+//Param x: Will take precedence over the internal x value. Will not overwrite internal value though.
+//Param y: Will take precedence over the internal y value. Will not overwrite internal value though.
 method drawable::draw(x, y, r, sx, sy, ox, oy, kx, ky) {
     x=x || self.x
     y=y || self.y
     love.graphics.draw(self.drawable, x, y, r, sx, sy, ox, oy, kx, ky)
 }
-
+//Represents a text object that can be drawn to the screen.
+//The text can be updated to new values.
+//The text can have its own font size and alignment mode
 local text={}
+//Should be called within an implementing class's init function
+//Param fontsize: integer representing the font size to be used for the Text's font.
+//Param width: The width limit of the text
+//Param height: The height limit of the text.
+//Will be rounded to the nearest multiple of the Font's height for the purpose of cutting off the text at the bottom.
+//Param text: initial string value for the text
+//Param align: initial align mode for the text, see (love) AlignMode
 method text::initText(fontsize, width, height, text, align) {
     self.fontsize=fontsize
     self.align=align || "left"
@@ -96,6 +140,9 @@ method text::initText(fontsize, width, height, text, align) {
     self.textCanvas=love.graphics.newCanvas(self.width-(20*2), math.floor((self.height-(20*2))/self.font::getHeight())*self.font::getHeight())
     self.text::setf(text, width-(20*2), self.align)
 }
+//Used to draw the text.
+//Should be used within the implementing class's draw function
+//Should be used AFTER most other draw functions within the Class
 method text::drawText(x, y, r, sx, sy, ox, oy, kx, ky) {
     x=x || 0
     y=y || 0
@@ -115,35 +162,31 @@ love.graphics.setCanvas(self.textCanvas)
     //love.graphics.draw(self.textCanvas, self.x+x+20, self.y+y+20, r, sx, sy, ox, oy, kx, ky)
     love.graphics.pop()
 }
-method text::drawText2(x, y, r, sx, sy, ox, oy, kx, ky) {
-    x=x || 0
-    y=y || 0
-    self.sx=self.sx || 1
-    self.sy=self.sy || 1
-     local a, b, c, d = love.graphics.getScissor()
-     love.graphics.push()
-            love.graphics.translate(self.x+x+20 + (self.width-(20*2))/2, self.y+y+20 + (math.floor((self.height-(20*2))/self.font::getHeight())*self.font::getHeight())/2)
-            love.graphics.scale(self.sx, self.sy)
-
-    love.graphics.setScissor(self.x+x+20, self.y+y+20, self.width-(20*2), math.floor((self.height-(20*2))/self.font::getHeight())*self.font::getHeight())
-    love.graphics.draw(self.text, -(self.width-(20*2))/2 , -(math.floor((self.height-(20*2))/self.font::getHeight())*self.font::getHeight())/2, r, sx, sy, ox, oy, kx, ky)
-    love.graphics.pop()
-     love.graphics.setScissor(a, b, c, d)
-}
+//Used to update the string used within the text
 method text::updateText(text) {
     self.text::setf(text, self.width-(20*2), self.align)
 }
-local active={}
 
+
+//Simple mixin used to add a universal active value for a GUI element.
+local active={}
+//Sets internal active value
 method active::setActive(bool) {
     self.active=bool
 }
-
+//Returns internal active value
 method active::getActive() {
     return self.active
 }
-
+//A Simple Universal Background for UI elements
 local rectangle={}
+//Should be called within an implementing class's init function
+//DO NOT call self::initDrawable within the class's init function
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param color: the color to draw this element with: in the form {red, green, blue, alpha} see love (Color)
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
 method rectangle::initRectangle(x, y, color, width, height) {
     self::initDrawable(x, y, true, width, height)
     self.rectangleCanvas=love.graphics.newCanvas(width, height)
@@ -153,6 +196,9 @@ method rectangle::initRectangle(x, y, color, width, height) {
     self.tween=nil
     self.hovered=false
 }
+//Used to draw the UI background
+//Should be used within the implementing class's draw function
+//Should be used BEFORE most other draw functions within the Class
 method rectangle::drawRectangle(x, y, rotation, sx, sy, ox, oy, kx, ky) {
     local x = x || 0
     local y = y || 0
@@ -181,6 +227,11 @@ method rectangle::drawRectangle(x, y, rotation, sx, sy, ox, oy, kx, ky) {
         love.graphics.draw(self.rectangleCanvas, (-self.width/2)+x, (-self.height/2)+y, rotation, sx, sy, ox, oy, kx, ky)
         love.graphics.pop()
 }
+//Used each update frame to update the rectangle
+//Param dt: deltaTime passed from love.update or GUI instance
+//Param x: current x position of the mouse, should be -1 if mouse is not currently available
+//Param y: current y position of the mouse, should be -1 if mouse is not currently available
+
 method rectangle::updateRectangle(dt, x, y) {
     if (self.clickFunctions && x>=self.x && x<=(self.x+self.width) && y>=self.y && y<=(self.y+self.height)) {
         if !self.tween {
@@ -193,13 +244,19 @@ method rectangle::updateRectangle(dt, x, y) {
         self.sy=1
     }
 }
+//Used by class library to ensure klass has included the drawable mixin.
 method rectangle::included(klass) {
     klass::include(active)
     klass::include(drawable)
 }
-
+//Internal, Invisible on it's own UI mixin to allow an element to be clicked and emit onClick functions.
 local button={}
-
+//Should be called within an implementing class's init function
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param active: whether this button is active. Can be disabled to disable click reactions
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
 method button::initButton(x, y, active, width, height) {
 
     self.x=x
@@ -211,16 +268,17 @@ method button::initButton(x, y, active, width, height) {
     self::setActive(active)
     self.clickFunctions={}
 }
-
+//Used by class library to ensure klass has included the active mixin.
 method button::included(klass) {
     klass::include(active)
 
 
 }
-
+//Used each update frame to update the rectangle
+//Param dt: deltaTime passed from love.update or GUI instance
 method button::update(dt) {
     if self::getActive() {
-        for _, point in buttonCache {
+        for _, point in clickCache {
             if (point.x>=self.upperLeft.x && point.x<=self.bottomRight.x && point.y>=self.upperLeft.y && point.y<=self.bottomRight.y) {
                 for _, v in self.clickFunctions {
                     v(self)
@@ -230,7 +288,7 @@ method button::update(dt) {
     }
 
 }
-
+//Used to register a callback function that will be called upon each click when active.
 method button::onClick(func) {
     table.insert(self.clickFunctions, func)
 }
@@ -238,7 +296,12 @@ method button::onClick(func) {
 local InvisibleButton = Class("InvisibleButton")
 
 InvisibleButton::include(button)
-
+//Used whenever a button needs to be implemented with no visible UI
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param active: whether this button is active. Can be disabled to disable click reactions
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
 method InvisibleButton::initialize(x, y, active, width, height) {
     self::initButton(x, y, active, width, height)
 
@@ -249,7 +312,14 @@ local BasicButton = Class("BasicButton")
 BasicButton::include(button)
 
 BasicButton::include(drawable)
-
+//A simple, crude combination of a drawable and a button. Will draw whatever is used via canvas parameter.
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param active: whether this button is active. Can be disabled to disable click reactions
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
+//Param canvas (bool==true and canvas==true): an internal canvas will be created based off of the width and height parameters
+//Param canvas (bool==false || (bool==true && canvas==false): the drawable will be set the the value of canvas
 method BasicButton::initialize(x, y, active, width, height, canvas) {
     self::initButton(x, y, active, width, height)
 
@@ -264,6 +334,17 @@ method TextBox::draw(x, y, r, sx, sy, ox, oy, kx, ky) {
     self::drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky)
     self::drawText(x, y, r, sx, sy, ox, oy, kx, ky)
 }
+//A simple TextBox Using a Rectangle background.
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param color: the color to draw this element's background with: in the form {red, green, blue, alpha} see love (Color)
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
+//Will be rounded to the nearest multiple of the Font's height for the purpose of cutting off the text at the bottom.
+//Param fontsize: integer representing the font size to be used for the Text's font.
+//Param text: initial string value for the text
+//Param align: initial align mode for the text, see (love) Al
+
 method TextBox::initialize(x, y, color, width, height, fontsize, text, align) {
    self::initRectangle(x, y, color, width, height)
    self::initText(fontsize, width, height, text, align)
@@ -280,6 +361,18 @@ method TextBoxButton::draw(x, y, r, sx, sy, ox, oy, kx, ky) {
     self::drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky)
     self::drawText(x, y, r, sx, sy, ox, oy, kx, ky)
 }
+//A simple TextBox Using a Rectangle background with a button attached.
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param color: the color to draw this element's background with: in the form {red, green, blue, alpha} see love (Color)
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
+//Will be rounded to the nearest multiple of the Font's height for the purpose of cutting off the text at the bottom.
+//Param fontsize: integer representing the font size to be used for the Text's font.
+//Param text: initial string value for the text
+//Param active: whether this button is active. Can be disabled to disable click reactions
+//Param align: initial align mode for the text, see (love) Al
+
 method TextBoxButton::initialize(x, y, color, width, height, fontsize, text, active, align) {
     self::initButton(x, y, active, width, height)
    self::initRectangle(x, y, color, width, height)
@@ -292,13 +385,19 @@ method TextBoxButton::update(dt, x, y) {
 local BasicDrawable = Class("BasicDrawable")
 
 BasicDrawable::include(drawable)
-
+//Literally just a wrapper over Drawable. See (gui) drawable mixin for more info
+//Param x: x position the internal drawable element should be drawn at.
+//Param y: y position the internal drawable element should be drawn at.
+//Param canvas (bool==true and canvas==true): an internal canvas will be created based off of the width and height parameters
+//Param canvas (bool==false || (bool==true && canvas==false): the drawable will be set the the value of canvas
+//Param width: The width to create the canvas
+//Param height: The height to create the canvas
 method BasicDrawable::initialize(x, y, canvas, width, height) {
 
     self::initDrawable(x, y, canvas, width, height)
 
 }
-
+//TODO: Implement Drawable TileMap as a proper GUI element.
 local out = {}
 
 out.GUI=GUI
@@ -313,4 +412,10 @@ out.InvisibleButton=InvisibleButton
 
 out.TextBox = TextBox
 out.TextBoxButton=TextBoxButton
+out.clickCache=clickCache
+//Used to clear the click Cache at the end of every love.update
+method GUI::clean() {
+    clickCache={}
+    out.clickCache=clickCache
+}
 return out

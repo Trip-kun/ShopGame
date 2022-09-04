@@ -28,6 +28,15 @@ method Tile::getTileset() {
 
 
 }
+method Tile::cloneTile() {
+    local tile = Tile()
+    tile.id=self.id
+    tile.prefix=self.prefix
+    tile.type=self.type
+    tile.tileset=self.tileset
+    tile.tilesetPrefix=self.tilesetPrefix
+    return tile
+}
 method Tile::toClue(TileMapName, TileMapPrefix, x, y) {
     local out = "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]=Tile::new()"
 
