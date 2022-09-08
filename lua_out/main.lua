@@ -27,6 +27,12 @@ _modules = {
 		local TileMap = import("libs.TileMap");
 		local Tile = import("libs.tile");
 		return function(GameData)
+			local canvas = love.graphics.newCanvas(24, 24);
+			GameData.Default.Images.Empty = canvas;
+			love.graphics.setCanvas(canvas);
+			love.graphics.clear(0, 0, 0, 0);
+			love.graphics.setCanvas();
+			local emptyQuad = love.graphics.newQuad(0, 0, 24, 24, canvas);
 			local orderedTable = {			};
 			GameData.Default.Tiles.DefaultTileset = setmetatable({			}, {
 				__newindex = function(tbl, key, value)
@@ -34,9 +40,15 @@ _modules = {
 						key, 
 						value
 					});
-					rawset(tbl, key, value);
+					local coll = false;
+					rawset(tbl, key, {
+						quad = value, 
+						collision = coll
+					});
 				end
 			});
+			GameData.Default.Tiles.DefaultTileset.EmptyCollider = emptyQuad;
+			GameData.Default.Tiles.DefaultTileset.Empty = emptyQuad;
 			GameData.Default.Tiles.DefaultTileset.Dirt = generateQuad24X(8, 3, GameData.Default.Images.DefaultTileset);
 			GameData.Default.Tiles.DefaultTileset.DirtULGrassDR = generateQuad24X(2, 2, GameData.Default.Images.DefaultTileset);
 			GameData.Default.Tiles.DefaultTileset.DirtUGrassD = generateQuad24X(3, 2, GameData.Default.Images.DefaultTileset);
@@ -88,6 +100,16 @@ _modules = {
 			GameData.Default.Tiles.DefaultTileset.GrassDLDarkUR = generateQuad24X(2+5, 9+5, GameData.Default.Images.DefaultTileset);
 			GameData.Default.Tiles.DefaultTileset.GrassDDarkU = generateQuad24X(3+5, 9+5, GameData.Default.Images.DefaultTileset);
 			GameData.Default.Tiles.DefaultTileset.GrassDRDarkUL = generateQuad24X(4+5, 9+5, GameData.Default.Images.DefaultTileset);
+			rawset(GameData.Default.Tiles.DefaultTileset, "Empty", nil);
+			GameData.Default.Tiles.Empty = {			};
+			GameData.Default.Tiles.Empty.EmptyCollider = {
+				quad = emptyQuad, 
+				collision = true
+			};
+			GameData.Default.Tiles.Empty.Empty = {
+				quad = emptyQuad, 
+				collision = false
+			};
 			local out = {			};
 			for k, v in ipairs(orderedTable) do
 				local t = Tile();
@@ -95,9 +117,14 @@ _modules = {
 				t.sy = 1;
 				t.id = v[(1)];
 				t.prefix = "Default";
-				t.tileset = "DefaultTileset";
+				if (v[(2)]==emptyQuad) then
+					t.tileset = "Empty";
+					t.type = "Utility_Tile";
+				else
+					t.type = "Basic_Tile";
+					t.tileset = "DefaultTileset";
+				end
 				t.tilesetPrefix = "Default";
-				t.type = "Basic_Tile";
 				table.insert(out, t);
 			end
 			GameData.Default.TileMaps.DefaultTileset = TileMap.fromTable(out);
@@ -755,7 +782,10 @@ _modules = {
 			GameData = import("libs.GameData");
 		end
 		function Tile:getQuad()
-			return GameData[(self.tilesetPrefix)].Tiles[(self.tileset)][(self.id)];
+			return GameData[(self.tilesetPrefix)].Tiles[(self.tileset)][(self.id)].quad;
+		end
+		function Tile:getCollision()
+			return GameData[(self.tilesetPrefix)].Tiles[(self.tileset)][(self.id)].collision;
 		end
 		function Tile:getTileset()
 			return GameData[(self.prefix)].Images[(self.tileset)];
@@ -771,6 +801,20 @@ _modules = {
 		end
 		function Tile:toClue(TileMapName, TileMapPrefix, x, y)
 			local out = "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]=Tile::new()";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['id']='"..self.id.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['prefix']='"..self.prefix.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['type']='"..self.type.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tileset']='"..self.tileset.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tilesetPrefix']='"..self.tilesetPrefix.."'";
+			return out;
+		end
+		function Tile:toLua(TileMapName, TileMapPrefix, x, y)
+			local out = "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]=Tile:new()";
 			out = out .. "\n";
 			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['id']='"..self.id.."'";
 			out = out .. "\n";
@@ -846,7 +890,7 @@ _modules = {
 				for y = 1, #self.data[(1)], 1 do
 					if self.data[(x)][(y)] then
 						out = out .. "\n";
-						out = out .. self.data[(x)][(y)]:toClue(self.name, self.prefix, x, y);
+						out = out .. self.data[(x)][(y)]:toLua(self.name, self.prefix, x, y);
 					end
 				end
 			end
@@ -871,8 +915,8 @@ _modules = {
 			local rmvTotal = 0;
 			local out = TileMap(1, 1);
 			local secondRun = false;
-			local function isEmpty(tabl)
-				for k, v in pairs(tabl) do
+			local function isEmpty(in_table)
+				for k, v in pairs(in_table) do
 					return false;
 				end
 				return true;
@@ -927,7 +971,7 @@ _modules = {
 					if (self.data[(x)][(y)]) then
 						local skip = false;
 						if (self.mouse.x>=(self.sx*(x-1)*24)+self.rx and self.mouse.x<=((x*24)*self.sx)+self.rx and self.mouse.y>=(y-1)*self.sy*24+self.ry and self.mouse.y<=((y)*self.sy*24)+self.ry) then
-							for _, point in ipairs(GUI.clickCache) do
+							if (love.mouse.isDown(1) or #love.touch.getTouches()>0) then
 								for _, v in ipairs(self.clickFunctions) do
 									v(self, x, y);
 								end
@@ -991,9 +1035,29 @@ _modules = {
 		function TileMap:setDebug(val)
 			self.debug = val;
 		end
+		function TileMap:collisionOut()
+			local out = {			};
+			for x = 1, #self.data, 1 do
+				out[(x)] = {				};
+				for y = 1, #self.data[(x)], 1 do
+					out[(x)][(y)] = self.data[(x)][(y)]:getCollision();
+				end
+			end
+			return out;
+		end
+		function TileMap.collapseCollision(out1, out2)
+			local out = {			};
+			for x = 1, #out1, 1 do
+				out[(x)] = {				};
+				for y = 1, #out1[(x)], 1 do
+					out[(x)][(y)] = out1[(x)][(y)] or out2[(x)][(y)];
+				end
+			end
+			return out;
+		end
 		function TileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
 			local found = false;
-			local foundplace = {
+			local found_place = {
 				x = -1, 
 				y = -1
 			};
@@ -1007,10 +1071,10 @@ _modules = {
 				for y = 1, #self.data[(x)], 1 do
 					if (self.data[(x)][(y)]) then
 						local skip = false;
-						if (self.mouse.x>=(sx*(x-1)*24)+rx and self.mouse.x<=((x*24)*sx)+rx and self.mouse.y>=(y-1)*24+ry and self.mouse.y<=((y)*24)+ry) then
+						if (self.mouse.x>=(sx*(x-1)*24)+rx and self.mouse.x<=((x*24)*sx)+rx and self.mouse.y>=((y-1)*sy*24)+ry and self.mouse.y<=((y)*24*sy)+ry) then
 							if (found~=true) then
 								found = true;
-								foundplace = {
+								found_place = {
 									x = x, 
 									y = y
 								};
@@ -1032,14 +1096,14 @@ _modules = {
 						end
 						if not skip then
 							love.graphics.push();
-							love.graphics.translate((x*24)-12+rx, (y*24)-12+ry);
+							love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
 							love.graphics.scale(self.data[(x)][(y)].sx, self.data[(x)][(y)].sy);
-							love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky);
+							love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
 							local oldColor = {
 								love.graphics.getColor()
 							};
 							love.graphics.setColor(0, 0, 0, 0.5);
-							love.graphics.rectangle("line", -12, -12, 24, 24);
+							love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
 							love.graphics.setColor(oldColor);
 							love.graphics.pop();
 						end
@@ -1047,25 +1111,25 @@ _modules = {
 				end
 			end
 			if found then
-				local x, y = foundplace.x, foundplace.y;
+				local x, y = found_place.x, found_place.y;
 				love.graphics.push();
-				love.graphics.translate((x*24)-12+rx, (y*24)-12+ry);
+				love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
 				love.graphics.scale(self.data[(x)][(y)].sx, self.data[(x)][(y)].sy);
-				love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky);
-				love.graphics.rectangle("line", -12, -12, 24, 24);
+				love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
+				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
 				love.graphics.pop();
 			end
 		end
 		function TileMap:onClick(func)
 			table.insert(self.clickFunctions, func);
 		end
-		function TileMap:loadEdits(newdata, first)
+		function TileMap:loadEdits(new_data, first)
 			if type(self.data[(1)])~="table" and not first then
 				error("incomplete data");
 			end
-			for x, z in pairs(newdata) do
+			for x, z in pairs(new_data) do
 				for y in pairs(z) do
-					self.data[(x)][(y)] = newdata[(x)][(y)];
+					self.data[(x)][(y)] = new_data[(x)][(y)];
 				end
 			end
 		end
@@ -1286,7 +1350,7 @@ _modules = {
 				local self = tileset;
 				push:start();
 				self.gui:background();
-				self.map:draw(20, 20);
+				self.map:draw(20, 20, 0, 2, 2);
 				self.gui:draw();
 				push:finish();
 			end
@@ -1328,7 +1392,7 @@ _modules = {
 			function main.draw()
 				push:start();
 				gui:background();
-				GameData.Default.TileMaps.DefaultTileMap:draw(20, 20);
+				GameData.Default.TileMaps.DefaultTileMap:draw(20, 20, 0, 2, 2);
 				gui:draw();
 				push:finish();
 			end
@@ -1382,7 +1446,7 @@ _modules = {
 			end
 		end
 		function love.quit()
-			log.info(GameData[('Default')][('TileMaps')][('DefaultTileMap')]:toLua());
+			
 		end
 		function love.load()
 			love.mouse.setVisible(true);
@@ -1411,6 +1475,7 @@ _modules = {
 			log.info("Fully Loaded");
 			local intro = love.audio.newSource("assets/intro.mp3", "static");
 			logo = love.graphics.newImage("assets/logo.png");
+			log.info(dump.dump2(GameData.Default.TileMaps.DefaultTileset:collisionOut()));
 			wait(4, function()
 				talkies.onAction();
 			end);

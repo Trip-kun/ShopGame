@@ -2,19 +2,27 @@ local fn generateQuad24X(x, y, tileset) {
     return love.graphics.newQuad(1+((x-1)*25), 1+((y-1)*25), 24, 24, tileset)
 
 }
+
 local TileMap = import("libs.TileMap")
 local Tile = import("libs.tile")
 return fn (GameData) {
+local canvas = love.graphics.newCanvas(24, 24)
+GameData.Default.Images.Empty=canvas
+love.graphics.setCanvas(canvas)
+love.graphics.clear(0, 0, 0, 0)
+love.graphics.setCanvas()
+local emptyQuad=love.graphics.newQuad(0, 0, 24, 24, canvas)
 local orderedTable={}
 GameData.Default.Tiles.DefaultTileset={
 
 meta newindex = fn (tbl, key, value) {
     table.insert(orderedTable, {key, value})
-    rawset(tbl, key, value)
+    local coll=false
+    rawset(tbl, key, {quad=value, collision=coll})
 }
 }
-
-
+GameData.Default.Tiles.DefaultTileset.EmptyCollider=emptyQuad
+GameData.Default.Tiles.DefaultTileset.Empty=emptyQuad
 GameData.Default.Tiles.DefaultTileset.Dirt=generateQuad24X(8, 3, GameData.Default.Images.DefaultTileset)
 GameData.Default.Tiles.DefaultTileset.DirtULGrassDR=generateQuad24X(2, 2, GameData.Default.Images.DefaultTileset)
 GameData.Default.Tiles.DefaultTileset.DirtUGrassD=generateQuad24X(3, 2, GameData.Default.Images.DefaultTileset)
@@ -76,16 +84,27 @@ GameData.Default.Tiles.DefaultTileset.GrassRDarkL=generateQuad24X(4+5, 8+5, Game
 GameData.Default.Tiles.DefaultTileset.GrassDLDarkUR=generateQuad24X(2+5, 9+5, GameData.Default.Images.DefaultTileset)
 GameData.Default.Tiles.DefaultTileset.GrassDDarkU=generateQuad24X(3+5, 9+5, GameData.Default.Images.DefaultTileset)
 GameData.Default.Tiles.DefaultTileset.GrassDRDarkUL=generateQuad24X(4+5, 9+5, GameData.Default.Images.DefaultTileset)
+rawset(GameData.Default.Tiles.DefaultTileset, "Empty", nil)
+GameData.Default.Tiles.Empty={}
+GameData.Default.Tiles.Empty.EmptyCollider={quad=emptyQuad, collision=true}
+GameData.Default.Tiles.Empty.Empty={quad=emptyQuad, collision=false}
 local out={}
 for k, v in orderedTable {
+
     local t = Tile()
     t.sx=1
     t.sy=1
     t.id=v[1]
     t.prefix="Default"
-    t.tileset="DefaultTileset"
+    if (v[2]==emptyQuad) {
+        t.tileset="Empty"
+        t.type="Utility_Tile"
+    } else {
+        t.type="Basic_Tile"
+        t.tileset="DefaultTileset"
+    }
     t.tilesetPrefix="Default"
-    t.type="Basic_Tile"
+
     table.insert(out, t)
 }
 GameData.Default.TileMaps.DefaultTileset=TileMap.fromTable(out)

@@ -19,8 +19,12 @@ method Tile.loadGameData() {
 
 
 }
+//TODO Implement Tile Draw Methods AND Tile Debug Draw Methods
 method Tile::getQuad() {
-    return GameData[self.tilesetPrefix].Tiles[self.tileset][self.id]
+    return GameData[self.tilesetPrefix].Tiles[self.tileset][self.id].quad
+}
+method Tile::getCollision() {
+    return GameData[self.tilesetPrefix].Tiles[self.tileset][self.id].collision
 }
 method Tile::getTileset() {
     return GameData[self.prefix].Images[self.tileset]
@@ -39,6 +43,26 @@ method Tile::cloneTile() {
 }
 method Tile::toClue(TileMapName, TileMapPrefix, x, y) {
     local out = "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]=Tile::new()"
+
+    out..="\n"
+    out..= "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]['id']='" .. self.id .. "'"
+
+    out..="\n"
+    out..= "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]['prefix']='" .. self.prefix .. "'"
+
+    out..="\n"
+    out..= "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]['type']='" .. self.type .. "'"
+
+    out..="\n"
+    out..= "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]['tileset']='" .. self.tileset .. "'"
+
+    out..="\n"
+    out..= "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]['tilesetPrefix']='" .. self.tilesetPrefix .. "'"
+
+    return out
+}
+method Tile::toLua(TileMapName, TileMapPrefix, x, y) {
+    local out = "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]=Tile:new()"
 
     out..="\n"
     out..= "GameData['" .. TileMapPrefix .. "']['TileMaps']['" .. TileMapName .. "']['data'][" .. x .. "][" .. y .. "]['id']='" .. self.id .. "'"

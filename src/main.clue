@@ -140,7 +140,7 @@ if (mode=="editor") {
         local self = tileset
         push::start()
             self.gui::background()
-            self.map::draw(20, 20)
+            self.map::draw(20, 20, 0, 2, 2)
             self.gui::draw()
 
             //love.graphics.print("Hello World")
@@ -186,7 +186,7 @@ if (mode=="editor") {
         //love.graphics.print("Hello World!")
         //local r, g, b, a = love.graphics.getColor()
         gui::background()
-        GameData.Default.TileMaps.DefaultTileMap::draw(20, 20)
+        GameData.Default.TileMaps.DefaultTileMap::draw(20, 20, 0, 2, 2)
         gui::draw()
         //love.graphics.setColor(1, 0, 1, 1)
         //love.graphics.rectangle("fill", mx, my, 24, 24)
@@ -243,7 +243,7 @@ if (mode=="editor") {
         }
 }
 method love.quit() {
-log.info(GameData['Default']['TileMaps']['DefaultTileMap']::toLua())
+//log.info(GameData['Default']['TileMaps']['DefaultTileMap']::toLua())
 }
 //Called Once Before the main love.run loop
 method love.load() {
@@ -276,6 +276,7 @@ method love.load() {
         log.info("Fully Loaded")
         local intro = love.audio.newSource("assets/intro.mp3", "static")
         global logo = love.graphics.newImage("assets/logo.png")
+        log.info(dump.dump2(GameData.Default.TileMaps.DefaultTileset::collisionOut()))
        wait(4, fn () { talkies.onAction()})
        intro::play()
        local talkies_text = ""

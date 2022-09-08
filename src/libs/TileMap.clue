@@ -45,7 +45,7 @@ method TileMap::toLua() {
         for y=1, #self.data[1] {
             if self.data[x][y] {
                 out..="\n"
-                out..=self.data[x][y]::toClue(self.name, self.prefix, x, y)
+                out..=self.data[x][y]::toLua(self.name, self.prefix, x, y)
             }
         }
 
@@ -75,45 +75,33 @@ method TileMap.fromTable(tbl) {
     local rmvTotal=0
     local out=TileMap(1, 1)
     local secondRun=false
-    local fn isEmpty(tabl) {
-       //print("IS EMPTY")
-        for k, v of tabl {
-           //print("NO SIR")
+    local fn isEmpty(in_table) {
+        for k, v of in_table {
             return false
         }
-       //print(tabl)
-       //print("YES SIR")
         return true
     }
     local xRun=1
     local yRun=1
     loop {
-       //print("Runthrough", xRun)
+
         if (secondRun) {
-           //print("Extend")
             yRun+=1
             xRun+=1
             out::extend(0, 1, 0, 1, fn {})
 
         }
         local rmv={}
-       //print(#tbl)
 
         for k, v of tbl {
-           //print("K", k)
             if out::isFull() {
-               //print("Full")
                 continue
             } else {
-           //print("Not Full")
 
                 for x=1, xRun {
-                   //print("X", x)
                     local needBreak=false
                     for y=1, yRun {
-                   //print("Y", y)
                         if (!out.data[x][y]) {
-                       //print("ADDING", x, y)
                         table.insert(rmv, k, true)
                             out.data[x][y]=v
                             needBreak=true
@@ -129,13 +117,11 @@ method TileMap.fromTable(tbl) {
             }
         }
         for k of rmv {
-           //print("REMOVE", k)
             rmvTotal+=1
             tbl[k]=nil
         }
         secondRun=true
     } until isEmpty(tbl)
-   //print("RMVD", rmvTotal)
     return out
 }
 
@@ -146,15 +132,16 @@ method TileMap::update(dt, x, y) {
             if (self.data[x][y]) {
                 local skip=false
                     if  ( self.mouse.x>=(self.sx*(x-1)*24)+self.rx && self.mouse.x<=((x*24)*self.sx)+self.rx && self.mouse.y>=(y-1)*self.sy*24+self.ry && self.mouse.y<=((y)*self.sy*24)+self.ry) {
-                        for _, point in GUI.clickCache {
-                                   for _, v in self.clickFunctions {
-                                        v(self, x, y)
-                                   }
+                        //for _, point in GUI.clickCache {
+                        if (love.mouse.isDown(1) || #love.touch.getTouches( ) > 0) {
+                               for _, v in self.clickFunctions {
+                                    v(self, x, y)
+                               }
                         }
-                        }
-                        }
-                        }
-                        }
+                    }
+                }
+            }
+     }
 }
 local fn extend2DArray(arr, lx, rx, dy, uy, fill) {
     if rx && rx>0 {
@@ -212,9 +199,29 @@ method TileMap::extend(left, right, up, down, func) {
 method TileMap::setDebug(val) {
     self.debug=val
 }
+method TileMap::collisionOut() {
+    local out={}
+    for x=1, #self.data {
+        out[x]={}
+        for y=1, #self.data[x] {
+            out[x][y]=self.data[x][y]::getCollision()
+        }
+    }
+    return out
+}
+method TileMap.collapseCollision(out1, out2) {
+    local out={}
+        for x=1, #out1 {
+            out[x]={}
+            for y=1, #out1[x] {
+                out[x][y]=out1[x][y] || out2[x][y]
+            }
+        }
+    return out
+}
 method TileMap::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
     local found=false
-    local foundplace={x=-1, y=-1}
+    local found_place={x=-1, y=-1}
     local sx = sx || 1
     local sy = sy || 1
     self.sx=sx
@@ -225,10 +232,10 @@ method TileMap::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
         for y=1, #self.data[x] {
             if (self.data[x][y]) {
             local skip=false
-                if  ( self.mouse.x>=(sx*(x-1)*24)+rx && self.mouse.x<=((x*24)*sx)+rx && self.mouse.y>=(y-1)*24+ry && self.mouse.y<=((y)*24)+ry) {
+                if  ( self.mouse.x>=(sx*(x-1)*24)+rx && self.mouse.x<=((x*24)*sx)+rx && self.mouse.y>=((y-1)*sy*24)+ry && self.mouse.y<=((y)*24*sy)+ry) {
                     if (found!=true) {
                     found=true
-                    foundplace={x=x, y=y}
+                    found_place={x=x, y=y}
                     skip=true
                     if !self.data[x][y].tween {
                         self.data[x][y].rect=true
@@ -244,12 +251,12 @@ method TileMap::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
                 }
             if !skip {
             love.graphics.push()
-            love.graphics.translate((x*24)-12+rx, (y*24)-12+ry)
+            love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry)
             love.graphics.scale(self.data[x][y].sx, self.data[x][y].sy)
-            love.graphics.draw(self.data[x][y]::getTileset(), self.data[x][y]::getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky)
+            love.graphics.draw(self.data[x][y]::getTileset(), self.data[x][y]::getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky)
             local oldColor = {love.graphics.getColor()}
             love.graphics.setColor(0, 0, 0, 0.5)
-            love.graphics.rectangle("line", -12, -12, 24, 24)
+            love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx)
             love.graphics.setColor(oldColor)
             love.graphics.pop()
             }
@@ -257,26 +264,26 @@ method TileMap::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
         }
     }
     if found {
-    local x, y = foundplace.x, foundplace.y
+    local x, y = found_place.x, found_place.y
     love.graphics.push()
-    love.graphics.translate((x*24)-12+rx, (y*24)-12+ry)
+    love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry)
     love.graphics.scale(self.data[x][y].sx, self.data[x][y].sy)
-    love.graphics.draw(self.data[x][y]::getTileset(), self.data[x][y]::getQuad(), -12, -12, r, sx, sy, ox, oy, kx, ky)
-        love.graphics.rectangle("line", -12, -12, 24, 24)
+    love.graphics.draw(self.data[x][y]::getTileset(), self.data[x][y]::getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky)
+        love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx)
     love.graphics.pop()
     }
 }
 method TileMap::onClick(func) {
     table.insert(self.clickFunctions, func)
 }
-method TileMap::loadEdits(newdata, first) {
+method TileMap::loadEdits(new_data, first) {
 
     if type(self.data[1])!="table" && !first {
         error("incomplete data")
     }
-    for x, z of newdata {
+    for x, z of new_data {
         for y of z {
-            self.data[x][y]=newdata[x][y]
+            self.data[x][y]=new_data[x][y]
 
         }
 
