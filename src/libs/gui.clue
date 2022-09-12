@@ -457,11 +457,9 @@ method TileMapMixin::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
             love.graphics.push()
             love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry)
             love.graphics.scale(self.map.data[x][y].sx, self.map.data[x][y].sy)
-            love.graphics.draw(self.map.data[x][y]::getTileset(), self.map.data[x][y]::getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky)
-            local oldColor = {love.graphics.getColor()}
-            love.graphics.setColor(0, 0, 0, 0.5)
-            love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx)
-            love.graphics.setColor(oldColor)
+            
+            self.map.data[x][y]::draw(x, y, r, sx, sy, ox, oy, kx, ky, true)
+            
             love.graphics.pop()
             }
         }
@@ -472,8 +470,7 @@ method TileMapMixin::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
     love.graphics.push()
     love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry)
     love.graphics.scale(self.map.data[x][y].sx, self.map.data[x][y].sy)
-    love.graphics.draw(self.map.data[x][y]::getTileset(), self.map.data[x][y]::getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky)
-        love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx)
+    self.map.data[x][y]::draw(x, y, r, sx, sy, ox, oy, kx, ky, true)
     love.graphics.pop()
     }
 }

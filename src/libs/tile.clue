@@ -32,6 +32,28 @@ method Tile::getTileset() {
 
 
 }
+method Tile::draw(x, y, r, sx, sy, ox, oy, kx, ky, debug) {
+    if (!self::isEmpty() && !debug) {
+        love.graphics.draw(self::getTileset(), self::getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky)
+    } elseif (self::isEmpty() && debug) {
+        local oldColor={love.graphics.getColor()}
+        if (self.id=="EmptyCollider") {
+            love.graphics.setColor(1, 0, 0, 1)
+        } else {
+            love.graphics.setColor(0, 1, 0, 1)
+        }
+        love.graphics.rectangle("fill", -12*sx, -12*sx, 24*sx, 24*sx)
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx)
+        love.graphics.setColor(oldColor)
+    } else {
+        love.graphics.draw(self::getTileset(), self::getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky)
+        local oldColor = {love.graphics.getColor()}
+        love.graphics.setColor(0, 0, 0, 0.5)
+        love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx)
+        love.graphics.setColor(oldColor)
+    }
+}
 method Tile::cloneTile() {
     local tile = Tile()
     tile.id=self.id
