@@ -129,119 +129,121 @@ if (mode=="editor") {
 
     }
 } else {
-    local tile
-    local gui
-    tileset={}
-    local move=0
-    local mx, my = -1, -1
-    tileset.switched=false
-    tileset.name="TILESET"
-    method tileset.draw() {
-        local self = tileset
-        push::start()
-            self.gui::background()
-            self.map::draw(20, 20, 0, 2, 2)
-            self.gui::draw()
+       local tile
+       local gui
+       tileset={}
+       local move=0
+       local mx, my = -1, -1
+       tileset.switched=false
+       tileset.name="tileset"
+       method tileset.draw() {
+           local self = tileset
+           push::start()
+               self.gui::background()
+               self.gui::draw()
 
-            //love.graphics.print("Hello World")
-        push::finish()
+               //love.graphics.print("Hello World")
+           push::finish()
 
-    }
-    method tileset.update(dt) {
-        local self = tileset
-        local x, y = love.mouse.getPosition()
-        local x, y = push.toGame(x, y)
-        if (love.system.getOS()=="Android") {
-                    local touches=love.touch.getTouches()
-                    if #touches==0 {
-                        x, y = -1, -1
-                    }
-                }
-        local x=x || -1
-        local y=y || -1
-        self.gui::update(dt, x, y)
-        self.map::update(dt, x, y)
-        self.gui::clean()
-    }
-    method tileset.switchto() {
-        if (!tileset.switched) {
+       }
+       method tileset.update(dt) {
+           local self = tileset
+           local x, y = love.mouse.getPosition()
+           local x, y = push.toGame(x, y)
+           if (love.system.getOS()=="Android") {
+                       local touches=love.touch.getTouches()
+                       if #touches==0 {
+                           x, y = -1, -1
+                       }
+                   }
+           local x=x || -1
+           local y=y || -1
+           self.gui::update(dt, x, y)
+           self.gui::clean()
+       }
+       method tileset.switchto() {
+           if (!tileset.switched) {
 
-            local self = tileset
-            self.map=GameData.Default.TileMaps.DefaultTileset
-            self.button=GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tilemap Editor", true)
+               local self = tileset
 
-                        self.button::onClick(fn (self, x, y) {
-                            gamestate.switch(main)
+               self.button=GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tilemap Editor", true)
+
+                           self.button::onClick(fn (self, x, y) {
+                               gamestate.switch(main)
 
 
-                        })
-                self.gui=GUI.GUI()
-                self.gui::add(self.button)
-                    GameData.Default.TileMaps.DefaultTileset::setDebug(true)
-        }
-        tileset.switched=true
-    }
-    method main.draw() {
-        push::start()
-        //love.graphics.print("Hello World!")
-        //local r, g, b, a = love.graphics.getColor()
-        gui::background()
-        GameData.Default.TileMaps.DefaultTileMap::draw(20, 20, 0, 2, 2)
-        gui::draw()
-        //love.graphics.setColor(1, 0, 1, 1)
-        //love.graphics.rectangle("fill", mx, my, 24, 24)
-        //love.graphics.setColor(r, g, b, a)
-        push::finish()
-    }
+                           })
+                   self.gui=GUI.GUI()
+                   self.gui::add(self.map)
+                   self.gui::add(self.button)
 
-    method main.update(dt) {
-        wait.update()
-        local x, y = love.mouse.getPosition()
-        local x, y = push.toGame(x, y)
-        if (love.system.getOS()=="Android") {
-                    local touches=love.touch.getTouches()
-                    if #touches==0 {
-                        x, y = -1, -1
-                    }
-                }
-        local x=x || -1
-        local y=y || -1
-        gui::update(dt, x, y)
-        GameData.Default.TileMaps.DefaultTileMap::update(dt, x, y)
-        gui::clean()
-    }
-    main.switched=false
-    method main.switchto() {
-        if (!main.switched) {
-        tile=GameData.Default.TileMaps.DefaultTileMap::newBasicTile()
-                local textboxbutton=GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tileset Picker", true)
+                       self.map.map::setDebug(true)
+           }
+           tileset.switched=true
+       }
+       method main.draw() {
+           push::start()
+           //love.graphics.print("Hello World!")
+           //local r, g, b, a = love.graphics.getColor()
+           gui::background()
+           gui::draw()
+           //love.graphics.setColor(1, 0, 1, 1)
+           //love.graphics.rectangle("fill", mx, my, 24, 24)
+           //love.graphics.setColor(r, g, b, a)
+           push::finish()
+       }
 
-            textboxbutton::onClick(fn (self, x, y) {
-                gamestate.switch(tileset)
+       method main.update(dt) {
+           wait.update()
+           local x, y = love.mouse.getPosition()
+           local x, y = push.toGame(x, y)
+           if (love.system.getOS()=="Android") {
+                       local touches=love.touch.getTouches()
+                       if #touches==0 {
+                           x, y = -1, -1
+                       }
+                   }
+           local x=x || -1
+           local y=y || -1
+           gui::update(dt, x, y)
+           gui::clean()
+       }
+       main.switched=false
+       method main.switchto() {
+           if (!main.switched) {
+           main.map=GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileMap)
+           tileset.map=GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileset)
+
+           tile=main.map.map::newBasicTile()
+                   local textboxbutton=GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tileset Picker", true)
+
+               textboxbutton::onClick(fn (self, x, y) {
+                   gamestate.switch(tileset)
 
 
-            })
-    gui=GUI.GUI()
-    gui::add(textboxbutton)
-        GameData.Default.TileMaps.DefaultTileMap::setDebug(true)
-        GameData.Default.TileMaps.DefaultTileMap::onClick(fn (self, x, y) {
-            self.data[x][y]=tile::cloneTile()
-        })
-        GameData.Default.TileMaps.DefaultTileset::onClick(fn (self, x, y) {
-                    tile=self.data[x][y]::cloneTile()
-                })
-        }
-        main.switched=true
-    }
-    method main.mousereleased(x, y, button, istouch, presses) {
-            local x, y = love.mouse.getPosition()
-            local x, y = push.toGame(x, y)
-            if x && y {
-                GUI.click(x, y, button)
-            }
+               })
+       gui=GUI.GUI()
+       gui::add(main.map)
+       gui::add(textboxbutton)
+           main.map.map::setDebug(true)
+           main.map::onClick(fn (self, x, y) {
+               self.map.data[x][y]=tile::cloneTile()
+           })
+           tileset.map::onClick(fn (self, x, y) {
+                       tile=self.map.data[x][y]::cloneTile()
+                   })
+           }
+           main.switched=true
+       }
+       method main.mousereleased(x, y, button, istouch, presses) {
+               local x, y = love.mouse.getPosition()
+               local x, y = push.toGame(x, y)
+               if x && y {
+                   GUI.click(x, y, button)
+               }
 
-        }
-}
+           }
+   }
 method love.quit() {
 //log.info(GameData['Default']['TileMaps']['DefaultTileMap']::toLua())
 }
@@ -276,7 +278,7 @@ method love.load() {
         log.info("Fully Loaded")
         local intro = love.audio.newSource("assets/intro.mp3", "static")
         global logo = love.graphics.newImage("assets/logo.png")
-        log.info(dump.dump2(GameData.Default.TileMaps.DefaultTileset::collisionOut()))
+        //log.info(dump.dump2(GameData.Default.TileMaps.DefaultTileset::collisionOut()))
        wait(4, fn () { talkies.onAction()})
        intro::play()
        local talkies_text = ""

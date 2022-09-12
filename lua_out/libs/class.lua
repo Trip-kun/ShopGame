@@ -122,7 +122,7 @@ local function _includeMixin(aClass, mixin)
 end
 
 local DefaultMixin = {
-    __tostring   = function(self) return "instance of " .. tostring(self.class) end,
+    --__tostring   = function(self) return "instance of " .. tostring(self.class) end,
 
     initialize   = function(self, ...) end,
 

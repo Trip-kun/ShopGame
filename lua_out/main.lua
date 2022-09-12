@@ -589,12 +589,122 @@ _modules = {
 		function BasicDrawable:initialize(x, y, canvas, width, height)
 			self:initDrawable(x, y, canvas, width, height);
 		end
+		local TileMapMixin = {		};
+		function TileMapMixin:initTileMap(map)
+			self.map = map;
+			self.clickFunctions = {			};
+		end
+		function TileMapMixin:update(dt, x, y)
+			self.map.mouse = {
+				x = x, 
+				y = y
+			};
+			for x = 1, #self.map.data, 1 do
+				for y = 1, #self.map.data[(x)], 1 do
+					if (self.map.data[(x)][(y)]) then
+						local skip = false;
+						if (self.map.mouse.x>=(self.sx*(x-1)*24)+self.rx and self.map.mouse.x<=((x*24)*self.sx)+self.rx and self.map.mouse.y>=(y-1)*self.sy*24+self.ry and self.map.mouse.y<=((y)*self.sy*24)+self.ry) then
+							if (love.mouse.isDown(1) or #love.touch.getTouches()>0) then
+								for _, v in ipairs(self.clickFunctions) do
+									v(self, x, y);
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		function TileMapMixin:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
+			local found = false;
+			local found_place = {
+				x = -1, 
+				y = -1
+			};
+			local sx = sx or 1;
+			local sy = sy or 1;
+			self.sx = sx;
+			self.sy = sy;
+			self.rx = rx;
+			self.ry = ry;
+			for x = 1, #self.map.data, 1 do
+				for y = 1, #self.map.data[(x)], 1 do
+					if (self.map.data[(x)][(y)]) then
+						local skip = false;
+						if (self.map.mouse.x>=(sx*(x-1)*24)+rx and self.map.mouse.x<=((x*24)*sx)+rx and self.map.mouse.y>=((y-1)*sy*24)+ry and self.map.mouse.y<=((y)*24*sy)+ry) then
+							if (found~=true) then
+								found = true;
+								found_place = {
+									x = x, 
+									y = y
+								};
+								skip = true;
+								if not self.map.data[(x)][(y)].tween then
+									self.map.data[(x)][(y)].rect = true;
+									self.map.data[(x)][(y)].tween = flux.to(self.map.data[(x)][(y)], 0.5, {
+										sx = 1.2, 
+										sy = 1.2
+									});
+								end
+							end
+						elseif (self.map.data[(x)][(y)].tween) then
+							self.map.data[(x)][(y)].rect = false;
+							self.map.data[(x)][(y)].tween:stop();
+							self.map.data[(x)][(y)].tween = nil;
+							self.map.data[(x)][(y)].sx = 1;
+							self.map.data[(x)][(y)].sy = 1;
+						end
+						if not skip then
+							love.graphics.push();
+							love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
+							love.graphics.scale(self.map.data[(x)][(y)].sx, self.map.data[(x)][(y)].sy);
+							love.graphics.draw(self.map.data[(x)][(y)]:getTileset(), self.map.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
+							local oldColor = {
+								love.graphics.getColor()
+							};
+							love.graphics.setColor(0, 0, 0, 0.5);
+							love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
+							love.graphics.setColor(oldColor);
+							love.graphics.pop();
+						end
+					end
+				end
+			end
+			if found then
+				local x, y = found_place.x, found_place.y;
+				love.graphics.push();
+				love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
+				love.graphics.scale(self.map.data[(x)][(y)].sx, self.map.data[(x)][(y)].sy);
+				love.graphics.draw(self.map.data[(x)][(y)]:getTileset(), self.map.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
+				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
+				love.graphics.pop();
+			end
+		end
+		function TileMapMixin:onClick(func)
+			table.insert(self.clickFunctions, func);
+		end
+		local BasicTileMap = Class("BasicTileMap");
+		BasicTileMap:include(TileMapMixin);
+		function BasicTileMap:initialize(x, y, sx, sy, map)
+			self.x = x;
+			self.y = y;
+			self._sx = sx;
+			self._sy = sy;
+			self:initTileMap(map);
+		end
+		function BasicTileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
+			rx = rx or 0;
+			ry = ry or 0;
+			sx = sx or 1;
+			sy = sy or 1;
+			TileMapMixin.draw(self, rx+self.x, ry+self.y, r, sx*self._sx, sy*self._sy, ox, oy, kx, ky);
+		end
 		local out = {		};
 		out.GUI = GUI;
 		out.click = click;
 		out.BasicButton = BasicButton;
 		out.BasicDrawable = BasicDrawable;
 		out.InvisibleButton = InvisibleButton;
+		out.BasicTileMap = BasicTileMap;
 		out.TextBox = TextBox;
 		out.TextBoxButton = TextBoxButton;
 		out.clickCache = clickCache;
@@ -842,7 +952,6 @@ _modules = {
 	end,
 	["libs.TileMap"] = function()
 		local Tile = import("libs.tile");
-		local GUI = import("libs.gui");
 		local Class = require("libs.class");
 		local TileMap = Class("TileMap");
 		local dump = require("libs.dump");
@@ -896,18 +1005,6 @@ _modules = {
 			end
 			return out;
 		end
-		function TileMap:prepare(tileset)
-			self.prepared = true;
-			self.spriteBatch = love.graphics.newSpriteBatch(tileset, #self.data*#self.data[(1)], "dynamic");
-			for x = 1, #self.data, 1 do
-				for y = 1, #self.data[(1)], 1 do
-					self.spriteBatch:add(self.data[(x)][(y)]:getQuad(), (x-1)*24, (y-1)*24);
-				end
-			end
-		end
-		function TileMap:drawBatch(x, y, r, sx, sy, ox, oy, kx, ky)
-			love.graphics.draw(self.spriteBatch, x, y, r, sx, sy, ox, oy, kx, ky);
-		end
 		function TileMap:isFull()
 			
 		end
@@ -960,26 +1057,6 @@ _modules = {
 				secondRun = true;
 			until isEmpty(tbl)
 			return out;
-		end
-		function TileMap:update(dt, x, y)
-			self.mouse = {
-				x = x, 
-				y = y
-			};
-			for x = 1, #self.data, 1 do
-				for y = 1, #self.data[(x)], 1 do
-					if (self.data[(x)][(y)]) then
-						local skip = false;
-						if (self.mouse.x>=(self.sx*(x-1)*24)+self.rx and self.mouse.x<=((x*24)*self.sx)+self.rx and self.mouse.y>=(y-1)*self.sy*24+self.ry and self.mouse.y<=((y)*self.sy*24)+self.ry) then
-							if (love.mouse.isDown(1) or #love.touch.getTouches()>0) then
-								for _, v in ipairs(self.clickFunctions) do
-									v(self, x, y);
-								end
-							end
-						end
-					end
-				end
-			end
 		end
 		local function extend2DArray(arr, lx, rx, dy, uy, fill)
 			if rx and rx>0 then
@@ -1054,74 +1131,6 @@ _modules = {
 				end
 			end
 			return out;
-		end
-		function TileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
-			local found = false;
-			local found_place = {
-				x = -1, 
-				y = -1
-			};
-			local sx = sx or 1;
-			local sy = sy or 1;
-			self.sx = sx;
-			self.sy = sy;
-			self.rx = rx;
-			self.ry = ry;
-			for x = 1, #self.data, 1 do
-				for y = 1, #self.data[(x)], 1 do
-					if (self.data[(x)][(y)]) then
-						local skip = false;
-						if (self.mouse.x>=(sx*(x-1)*24)+rx and self.mouse.x<=((x*24)*sx)+rx and self.mouse.y>=((y-1)*sy*24)+ry and self.mouse.y<=((y)*24*sy)+ry) then
-							if (found~=true) then
-								found = true;
-								found_place = {
-									x = x, 
-									y = y
-								};
-								skip = true;
-								if not self.data[(x)][(y)].tween then
-									self.data[(x)][(y)].rect = true;
-									self.data[(x)][(y)].tween = flux.to(self.data[(x)][(y)], 0.5, {
-										sx = 1.2, 
-										sy = 1.2
-									});
-								end
-							end
-						elseif (self.data[(x)][(y)].tween) then
-							self.data[(x)][(y)].rect = false;
-							self.data[(x)][(y)].tween:stop();
-							self.data[(x)][(y)].tween = nil;
-							self.data[(x)][(y)].sx = 1;
-							self.data[(x)][(y)].sy = 1;
-						end
-						if not skip then
-							love.graphics.push();
-							love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
-							love.graphics.scale(self.data[(x)][(y)].sx, self.data[(x)][(y)].sy);
-							love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
-							local oldColor = {
-								love.graphics.getColor()
-							};
-							love.graphics.setColor(0, 0, 0, 0.5);
-							love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
-							love.graphics.setColor(oldColor);
-							love.graphics.pop();
-						end
-					end
-				end
-			end
-			if found then
-				local x, y = found_place.x, found_place.y;
-				love.graphics.push();
-				love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
-				love.graphics.scale(self.data[(x)][(y)].sx, self.data[(x)][(y)].sy);
-				love.graphics.draw(self.data[(x)][(y)]:getTileset(), self.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
-				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
-				love.graphics.pop();
-			end
-		end
-		function TileMap:onClick(func)
-			table.insert(self.clickFunctions, func);
 		end
 		function TileMap:loadEdits(new_data, first)
 			if type(self.data[(1)])~="table" and not first then
@@ -1345,12 +1354,11 @@ _modules = {
 			local move = 0;
 			local mx, my = -1, -1;
 			tileset.switched = false;
-			tileset.name = "TILESET";
+			tileset.name = "tileset";
 			function tileset.draw()
 				local self = tileset;
 				push:start();
 				self.gui:background();
-				self.map:draw(20, 20, 0, 2, 2);
 				self.gui:draw();
 				push:finish();
 			end
@@ -1367,13 +1375,11 @@ _modules = {
 				local x = x or -1;
 				local y = y or -1;
 				self.gui:update(dt, x, y);
-				self.map:update(dt, x, y);
 				self.gui:clean();
 			end
 			function tileset.switchto()
 				if (not tileset.switched) then
 					local self = tileset;
-					self.map = GameData.Default.TileMaps.DefaultTileset;
 					self.button = GUI.TextBoxButton(240*2, 0, {
 						0, 
 						0, 
@@ -1384,15 +1390,15 @@ _modules = {
 						gamestate.switch(main);
 					end);
 					self.gui = GUI.GUI();
+					self.gui:add(self.map);
 					self.gui:add(self.button);
-					GameData.Default.TileMaps.DefaultTileset:setDebug(true);
+					self.map.map:setDebug(true);
 				end
 				tileset.switched = true;
 			end
 			function main.draw()
 				push:start();
 				gui:background();
-				GameData.Default.TileMaps.DefaultTileMap:draw(20, 20, 0, 2, 2);
 				gui:draw();
 				push:finish();
 			end
@@ -1409,13 +1415,14 @@ _modules = {
 				local x = x or -1;
 				local y = y or -1;
 				gui:update(dt, x, y);
-				GameData.Default.TileMaps.DefaultTileMap:update(dt, x, y);
 				gui:clean();
 			end
 			main.switched = false;
 			function main.switchto()
 				if (not main.switched) then
-					tile = GameData.Default.TileMaps.DefaultTileMap:newBasicTile();
+					main.map = GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileMap);
+					tileset.map = GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileset);
+					tile = main.map.map:newBasicTile();
 					local textboxbutton = GUI.TextBoxButton(240*2, 0, {
 						0, 
 						0, 
@@ -1426,13 +1433,14 @@ _modules = {
 						gamestate.switch(tileset);
 					end);
 					gui = GUI.GUI();
+					gui:add(main.map);
 					gui:add(textboxbutton);
-					GameData.Default.TileMaps.DefaultTileMap:setDebug(true);
-					GameData.Default.TileMaps.DefaultTileMap:onClick(function(self, x, y)
-						self.data[(x)][(y)] = tile:cloneTile();
+					main.map.map:setDebug(true);
+					main.map:onClick(function(self, x, y)
+						self.map.data[(x)][(y)] = tile:cloneTile();
 					end);
-					GameData.Default.TileMaps.DefaultTileset:onClick(function(self, x, y)
-						tile = self.data[(x)][(y)]:cloneTile();
+					tileset.map:onClick(function(self, x, y)
+						tile = self.map.data[(x)][(y)]:cloneTile();
 					end);
 				end
 				main.switched = true;
@@ -1475,7 +1483,6 @@ _modules = {
 			log.info("Fully Loaded");
 			local intro = love.audio.newSource("assets/intro.mp3", "static");
 			logo = love.graphics.newImage("assets/logo.png");
-			log.info(dump.dump2(GameData.Default.TileMaps.DefaultTileset:collisionOut()));
 			wait(4, function()
 				talkies.onAction();
 			end);
