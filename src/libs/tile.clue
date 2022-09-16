@@ -32,15 +32,20 @@ method Tile::getTileset() {
 
 
 }
+method Tile::isEmpty() {
+
+    return self.id=="Empty" || self.id=="EmptyCollider"
+
+}
 method Tile::draw(x, y, r, sx, sy, ox, oy, kx, ky, debug) {
     if (!self::isEmpty() && !debug) {
         love.graphics.draw(self::getTileset(), self::getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky)
     } elseif (self::isEmpty() && debug) {
         local oldColor={love.graphics.getColor()}
         if (self.id=="EmptyCollider") {
-            love.graphics.setColor(1, 0, 0, 1)
+            love.graphics.setColor(1, 0, 0, 0.5)
         } else {
-            love.graphics.setColor(0, 1, 0, 1)
+            love.graphics.setColor(0, 1, 0, 0.5)
         }
         love.graphics.rectangle("fill", -12*sx, -12*sx, 24*sx, 24*sx)
         love.graphics.setColor(0, 0, 0, 0.5)
