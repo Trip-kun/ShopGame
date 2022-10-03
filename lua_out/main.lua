@@ -603,7 +603,7 @@ _modules = {
 				for y = 1, #self.map.data[(x)], 1 do
 					if (self.map.data[(x)][(y)]) then
 						local skip = false;
-						if (self.map.mouse.x>=(self.sx*(x-1)*24)+self.rx and self.map.mouse.x<=((x*24)*self.sx)+self.rx and self.map.mouse.y>=(y-1)*self.sy*24+self.ry and self.map.mouse.y<=((y)*self.sy*24)+self.ry) then
+						if (self.interact and self.map.mouse.x>=(self.sx*(x-1)*24)+self.rx and self.map.mouse.x<=((x*24)*self.sx)+self.rx and self.map.mouse.y>=(y-1)*self.sy*24+self.ry and self.map.mouse.y<=((y)*self.sy*24)+self.ry) then
 							if (love.mouse.isDown(1) or #love.touch.getTouches()>0) then
 								for _, v in ipairs(self.clickFunctions) do
 									v(self, x, y);
@@ -639,11 +639,13 @@ _modules = {
 								};
 								skip = true;
 								if not self.map.data[(x)][(y)].tween then
-									self.map.data[(x)][(y)].rect = true;
-									self.map.data[(x)][(y)].tween = flux.to(self.map.data[(x)][(y)], 0.5, {
-										sx = 1.2, 
-										sy = 1.2
-									});
+									if self.interact then
+										self.map.data[(x)][(y)].rect = true;
+										self.map.data[(x)][(y)].tween = flux.to(self.map.data[(x)][(y)], 0.5, {
+											sx = 1.2, 
+											sy = 1.2
+										});
+									end
 								end
 							end
 						elseif (self.map.data[(x)][(y)].tween) then
@@ -657,13 +659,7 @@ _modules = {
 							love.graphics.push();
 							love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
 							love.graphics.scale(self.map.data[(x)][(y)].sx, self.map.data[(x)][(y)].sy);
-							love.graphics.draw(self.map.data[(x)][(y)]:getTileset(), self.map.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
-							local oldColor = {
-								love.graphics.getColor()
-							};
-							love.graphics.setColor(0, 0, 0, 0.5);
-							love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
-							love.graphics.setColor(oldColor);
+							self.map.data[(x)][(y)]:draw(x, y, r, sx, sy, ox, oy, kx, ky, true);
 							love.graphics.pop();
 						end
 					end
@@ -674,8 +670,7 @@ _modules = {
 				love.graphics.push();
 				love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
 				love.graphics.scale(self.map.data[(x)][(y)].sx, self.map.data[(x)][(y)].sy);
-				love.graphics.draw(self.map.data[(x)][(y)]:getTileset(), self.map.data[(x)][(y)]:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
-				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
+				self.map.data[(x)][(y)]:draw(x, y, r, sx, sy, ox, oy, kx, ky, true);
 				love.graphics.pop();
 			end
 		end
@@ -769,6 +764,58 @@ _modules = {
 		end
 		log.custom("ITEM", "Initial Log Complete");
 		return Item;
+	end,
+	["libs.LayeredTileMap"] = function()
+		local Tile = import("libs.tile");
+		local Class = require("libs.class");
+		local LayeredTileMap = Class("LayeredTileMap");
+		local dump = require("libs.dump");
+		local flux = require("libs.flux");
+		local TileMap = import("libs.TileMap");
+		LayeredTileMap.name = "Default";
+		LayeredTileMap.x = 10;
+		LayeredTileMap.y = 10;
+		LayeredTileMap.z = 5;
+		LayeredTileMap.layers = {		};
+		LayeredTileMap.mouse = {
+			x = -1, 
+			y = -1
+		};
+		function LayeredTileMap:initialize(x, y, z)
+			self.debug = false;
+			self.x = x;
+			self.y = y;
+			self.z = z;
+			self.sx = 1;
+			self.sy = 1;
+			self.clickFunctions = {			};
+			self.layers = {			};
+			for i = 1, z, 1 do
+				self.layers[(i)] = TileMap(x, y);
+				self.layers[(i)].clickFunctions = {				};
+			end
+		end
+		function LayeredTileMap:alias(index, alias)
+			self[(alias)] = self.layers[(index)];
+		end
+		function LayeredTileMap:extend(left, right, up, down, func)
+			for i = 1, #self.layers, 1 do
+				self.layers[(i)]:extend(left, right, up, down, func);
+			end
+		end
+		function LayeredTileMap:setDebug(val)
+			self.debug = val;
+			for i = 1, #self.layers, 1 do
+				self.layers[(i)].debug = val;
+			end
+		end
+		function LayeredTileMap:collisionOut()
+			local out = self.layers[(#self.layers)]:collisionOut();
+			for i = #self.layers-1, 1, 1 do
+				out = TileMap.collapseCollision(out, self.layers[(i)]:collisionOut());
+			end
+			return out;
+		end
 	end,
 	["libs.log"] = function()
 		local function Log(level, msg)
@@ -899,6 +946,35 @@ _modules = {
 		end
 		function Tile:getTileset()
 			return GameData[(self.prefix)].Images[(self.tileset)];
+		end
+		function Tile:isEmpty()
+			return self.id=="Empty" or self.id=="EmptyCollider";
+		end
+		function Tile:draw(x, y, r, sx, sy, ox, oy, kx, ky, debug)
+			if (not self:isEmpty() and not debug) then
+				love.graphics.draw(self:getTileset(), self:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
+			elseif (self:isEmpty() and debug) then
+				local oldColor = {
+					love.graphics.getColor()
+				};
+				if (self.id=="EmptyCollider") then
+					love.graphics.setColor(1, 0, 0, 0.5);
+				else
+					love.graphics.setColor(0, 1, 0, 0.5);
+				end
+				love.graphics.rectangle("fill", -12*sx, -12*sx, 24*sx, 24*sx);
+				love.graphics.setColor(0, 0, 0, 0.5);
+				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
+				love.graphics.setColor(oldColor);
+			else
+				love.graphics.draw(self:getTileset(), self:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
+				local oldColor = {
+					love.graphics.getColor()
+				};
+				love.graphics.setColor(0, 0, 0, 0.5);
+				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
+				love.graphics.setColor(oldColor);
+			end
 		end
 		function Tile:cloneTile()
 			local tile = Tile();
@@ -1240,6 +1316,7 @@ _modules = {
 			Tile = import("libs.tile");
 			TileMap = import("libs.TileMap");
 			GameData = import("libs.GameData");
+			LayeredTileMap = import("libs.LayeredTileMap");
 			local mathExtensions = import("libs.Math");
 			for k, v in pairs(mathExtensions) do
 				math[(k)] = v;
@@ -1393,6 +1470,7 @@ _modules = {
 					self.gui:add(self.map);
 					self.gui:add(self.button);
 					self.map.map:setDebug(true);
+					self.map.interact = true;
 				end
 				tileset.switched = true;
 			end
@@ -1435,6 +1513,7 @@ _modules = {
 					gui = GUI.GUI();
 					gui:add(main.map);
 					gui:add(textboxbutton);
+					main.map.interact = true;
 					main.map.map:setDebug(true);
 					main.map:onClick(function(self, x, y)
 						self.map.data[(x)][(y)] = tile:cloneTile();

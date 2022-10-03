@@ -36,6 +36,7 @@ local fn loadLibraries () {
             global Tile = import("libs.tile")
             global TileMap = import("libs.TileMap")
             global GameData=import("libs.GameData")
+            global LayeredTileMap=import("libs.LayeredTileMap")
             local mathExtensions=import("libs.Math")
             for k, v of mathExtensions {
                 math[k]=v
@@ -178,6 +179,7 @@ if (mode=="editor") {
                    self.gui::add(self.button)
 
                        self.map.map::setDebug(true)
+                       self.map.interact=true
            }
            tileset.switched=true
        }
@@ -225,6 +227,7 @@ if (mode=="editor") {
        gui=GUI.GUI()
        gui::add(main.map)
        gui::add(textboxbutton)
+           main.map.interact=true
            main.map.map::setDebug(true)
            main.map::onClick(fn (self, x, y) {
                self.map.data[x][y]=tile::cloneTile()

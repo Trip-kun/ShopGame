@@ -411,7 +411,7 @@ method TileMapMixin::update(dt, x, y) {
             for y=1, #self.map.data[x] {
             if (self.map.data[x][y]) {
                 local skip=false
-                    if  ( self.map.mouse.x>=(self.sx*(x-1)*24)+self.rx && self.map.mouse.x<=((x*24)*self.sx)+self.rx && self.map.mouse.y>=(y-1)*self.sy*24+self.ry && self.map.mouse.y<=((y)*self.sy*24)+self.ry) {
+                    if  (self.interact && self.map.mouse.x>=(self.sx*(x-1)*24)+self.rx && self.map.mouse.x<=((x*24)*self.sx)+self.rx && self.map.mouse.y>=(y-1)*self.sy*24+self.ry && self.map.mouse.y<=((y)*self.sy*24)+self.ry) {
                         //for _, point in GUI.clickCache
                         if (love.mouse.isDown(1) || #love.touch.getTouches( ) > 0) {
                                for _, v in self.clickFunctions {
@@ -442,8 +442,10 @@ method TileMapMixin::draw(rx, ry, r, sx, sy, ox, oy, kx, ky) {
                     found_place={x=x, y=y}
                     skip=true
                     if !self.map.data[x][y].tween {
-                        self.map.data[x][y].rect=true
-                        self.map.data[x][y].tween=flux.to(self.map.data[x][y], 0.5, {sx=1.2, sy=1.2})
+                        if self.interact {
+                            self.map.data[x][y].rect=true
+                            self.map.data[x][y].tween=flux.to(self.map.data[x][y], 0.5, {sx=1.2, sy=1.2})
+                        }
                     }
                     }
                 }   elseif (self.map.data[x][y].tween) {
