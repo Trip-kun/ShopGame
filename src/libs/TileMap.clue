@@ -52,7 +52,26 @@ method TileMap::toLua() {
     return out
 }
 method TileMap::isFull() {
-
+    local out=true
+    for x=1, self.x {
+        local needBreak = false
+        if self.data[x] {
+            for y=1, self.y {
+                if !self.data[x][y] {
+                    out=false
+                    needBreak=true
+                    break
+                }
+            }
+            if needBreak {
+                break
+            }
+        } else {
+            out=false
+            break
+        }
+    }
+    return out
 }
 method TileMap.fromTable(tbl) {
     local rmvTotal=0
@@ -160,6 +179,8 @@ method TileMap::newBasicTile() {
 }
 method TileMap::extend(left, right, up, down, func) {
     extend2DArray(self.data, left, right, down, up, func || self.newBasicTile )
+    self.x+=left + right
+    self.y+=up + down
 }
 method TileMap::setDebug(val) {
     self.debug=val
