@@ -25,11 +25,11 @@ local fn loadLibraries () {
     global util = import("libs.util")
             global log = import("libs.log")
             global splash = require("libs.splash")
-            global gamestate = import("libs.gamestate")
+            global gamestate = import("libs.util.gamestate")
             global talkies = require("libs.talkies")
-            global wait = import("libs.wait")
+            global wait = import("libs.util.wait")
             global dump = require("libs.dump")
-            global settings = import("libs.settings")
+            global settings = import("libs.util.settings")
             global class = require("libs.class")
             global Item = import("libs.Item")
             global bump = require("libs.bump")
@@ -37,12 +37,19 @@ local fn loadLibraries () {
             global TileMap = import("libs.TileMap")
             global GameData=import("libs.GameData")
             global LayeredTileMap=import("libs.LayeredTileMap")
-            local mathExtensions=import("libs.Math")
+            local mathExtensions=import("libs.util.Math")
             for k, v of mathExtensions {
                 math[k]=v
 
             }
-            global GUI=import("libs.gui")
+            global GUI=import("libs.gui.gui")
+            GUI.register("BasicButton", import("libs.gui.elements.BasicButton"))
+            GUI.register("BasicDrawable", import("libs.gui.elements.BasicDrawable"))
+            GUI.register("BasicTileMap", import("libs.gui.elements.BasicTileMap"))
+            GUI.register("InvisibleButton", import("libs.gui.elements.InvisibleButton"))
+            GUI.register("TextBox", import("libs.gui.elements.TextBox"))
+            GUI.register("TextBoxButton", import("libs.gui.elements.TextBoxButton"))
+            GUI.register("GUI", import("libs.gui.elements.Wrapper"))
 }
 method love.resize(w, h) {
 push.resize(w, h)
@@ -125,7 +132,7 @@ if (mode=="editor") {
         local x, y = love.mouse.getPosition()
         local x, y = push.toGame(x, y)
         if x && y {
-            GUI.click(x, y, button)
+            gui.click(x, y, button)
         }
 
     }
@@ -242,7 +249,7 @@ if (mode=="editor") {
                local x, y = love.mouse.getPosition()
                local x, y = push.toGame(x, y)
                if x && y {
-                   GUI.click(x, y, button)
+                   gui.click(x, y, button)
                }
 
            }

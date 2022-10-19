@@ -1,5 +1,6 @@
+local Class = require("libs.class")
 local BasicDrawable = Class("BasicDrawable")
-
+local drawable = import("libs.gui.mixins.Drawable")
 BasicDrawable::include(drawable)
 //Literally just a wrapper over Drawable. See (gui) drawable mixin for more info
 //Param x: x position the internal drawable element should be drawn at.

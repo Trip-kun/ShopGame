@@ -1,3 +1,4 @@
+//Used to cache fonts to avoid doubling up on identical fonts
 local fontCache={}
 fontCache[12]=love.graphics.newFont(12)
 fontCache[14]=love.graphics.newFont(14)

@@ -1,5 +1,8 @@
 //A Simple Universal Background for UI elements
 local rectangle={}
+local drawable = import("libs.gui.mixins.Drawable")
+local active = import("libs.gui.mixins.Active")
+local flux = require("libs.flux")
 //Should be called within an implementing class's init function
 //DO NOT call self::initDrawable within the class's init function
 //Param x: x position the internal drawable element should be drawn at.

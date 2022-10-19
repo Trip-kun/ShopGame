@@ -1,6 +1,6 @@
-
+local Class = require("libs.class")
 local BasicTileMap = Class("BasicTileMap")
-
+local TileMapMixin = import("libs.gui.mixins.GuiTileMap")
 BasicTileMap::include(TileMapMixin)
 //A simple implementation of a TileMap. See (gui) TileMapMixin for more info
 //Param x: x position the internal drawable element should be drawn at.

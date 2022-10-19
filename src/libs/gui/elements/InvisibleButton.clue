@@ -1,5 +1,6 @@
+local Class = require("libs.class")
 local InvisibleButton = Class("InvisibleButton")
-
+local button = import("libs.gui.mixins.Button")
 InvisibleButton::include(button)
 //Used whenever a button needs to be implemented with no visible UI
 //Param x: x position the internal drawable element should be drawn at.

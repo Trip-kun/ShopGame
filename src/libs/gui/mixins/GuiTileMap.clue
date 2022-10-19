@@ -5,7 +5,8 @@ method TileMapMixin::initTileMap(map) {
     self.map=map
     self.clickFunctions={}
 }
-
+local flux = require("libs.flux")
+local ClickCache = import("libs.gui.subsystems.ClickCache")
 method TileMapMixin::update(dt, x, y) {
     self.map.mouse={x=x,y=y}
      for x=1, #self.map.data {
@@ -13,7 +14,7 @@ method TileMapMixin::update(dt, x, y) {
             if (self.map.data[x][y]) {
                 local skip=false
                     if  (self.interact && self.map.mouse.x>=(self.sx*(x-1)*24)+self.rx && self.map.mouse.x<=((x*24)*self.sx)+self.rx && self.map.mouse.y>=(y-1)*self.sy*24+self.ry && self.map.mouse.y<=((y)*self.sy*24)+self.ry) {
-                        //for _, point in GUI.clickCache
+                        //for _, point in ClickCache.getCache()
                         if (love.mouse.isDown(1) || #love.touch.getTouches( ) > 0) {
                                for _, v in self.clickFunctions {
                                     v(self, x, y)

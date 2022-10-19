@@ -1,4 +1,8 @@
+local Class = require("libs.class")
 local TextBoxButton = Class("TextBoxButton")
+local button = import("libs.gui.mixins.Button")
+local text = import("libs.gui.mixins.Text")
+local rectangle = import("libs.gui.mixins.Rectangle")
 TextBoxButton::include(button)
 TextBoxButton::include(text)
 TextBoxButton::include(rectangle)

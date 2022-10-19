@@ -2,7 +2,13 @@
 //Cleared at the end of every love.update
 //Data is stored in the form of clickCache[index]={x=x, y=y}
 local clickCache={}
+local mathExtensions = import("libs.util.Math")
 
+
+//import math extensions into the global lua math library
+for k, v of mathExtensions {
+    math[k]=v
+}
 
 //TODO: Update to support responding to different mouse buttons
 //Used to insert into the clickCache
@@ -19,5 +25,5 @@ if button==1 {
 local out = {}
 out.click=click
 out.clear = fn () {clickCache={}}
-
+out.getCache = fn () {return clickCache }
 return out

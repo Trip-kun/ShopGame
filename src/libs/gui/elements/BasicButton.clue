@@ -1,5 +1,7 @@
+local Class = require("libs.class")
 local BasicButton = Class("BasicButton")
-
+local button = import("libs.gui.mixins.Button")
+local drawable = import("libs.gui.mixins.Drawable")
 BasicButton::include(button)
 
 BasicButton::include(drawable)

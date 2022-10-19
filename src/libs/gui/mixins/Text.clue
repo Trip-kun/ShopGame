@@ -9,6 +9,7 @@ local text={}
 //Will be rounded to the nearest multiple of the Font's height for the purpose of cutting off the text at the bottom.
 //Param text: initial string value for the text
 //Param align: initial align mode for the text, see (love) AlignMode
+local fontCache = import("libs.gui.subsystems.FontCache")
 method text::initText(fontsize, width, height, text, align) {
     self.fontsize=fontsize
     self.align=align || "left"
