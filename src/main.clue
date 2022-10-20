@@ -22,7 +22,7 @@ global TileMap = nil
 global GUI=nil
 global GameData = nil
 local fn loadLibraries () {
-    global util = import("libs.util")
+            global util = import("libs.util.util")
             global log = import("libs.log")
             global splash = require("libs.splash")
             global gamestate = import("libs.util.gamestate")
