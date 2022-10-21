@@ -1,7 +1,7 @@
 local Class = require("libs.class")
 local ClickCache = import("libs.gui.subsystems.ClickCache")
-
-
+local backgroundColor = {0.5, 0.5, 0.5, 1}
+local flux = require("libs.flux")
 //GUI is a user interface holder class, designed for several purposes.
 //1. Manage and update the click cache
 //2. Set the background color without interfering with PUSH library
@@ -15,6 +15,7 @@ method GUI::initialize() {
 //Used to add a GUI element to an instance of GUI
 method GUI::add(child) {
     table.insert(self.children, child)
+    return #self.children
 }
 //Used each frame to draw the background color.
 method GUI::background() {

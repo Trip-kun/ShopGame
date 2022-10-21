@@ -2,6 +2,7 @@ local Class = require("libs.class")
 local TextBox = Class("TextBox")
 local text = import("libs.gui.mixins.Text")
 local rectangle = import("libs.gui.mixins.Rectangle")
+local drawable = import("libs.gui.mixins.Drawable")
 TextBox::include(text)
 TextBox::include(rectangle)
 method TextBox::draw(x, y, r, sx, sy, ox, oy, kx, ky) {

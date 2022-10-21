@@ -84,10 +84,8 @@ GameData.Default.Tiles.DefaultTileset.GrassRDarkL=generateQuad24X(4+5, 8+5, Game
 GameData.Default.Tiles.DefaultTileset.GrassDLDarkUR=generateQuad24X(2+5, 9+5, GameData.Default.Images.DefaultTileset)
 GameData.Default.Tiles.DefaultTileset.GrassDDarkU=generateQuad24X(3+5, 9+5, GameData.Default.Images.DefaultTileset)
 GameData.Default.Tiles.DefaultTileset.GrassDRDarkUL=generateQuad24X(4+5, 9+5, GameData.Default.Images.DefaultTileset)
-rawset(GameData.Default.Tiles.DefaultTileset, "Empty", nil)
-GameData.Default.Tiles.Empty={}
-GameData.Default.Tiles.Empty.EmptyCollider={quad=emptyQuad, collision=true}
-GameData.Default.Tiles.Empty.Empty={quad=emptyQuad, collision=false}
+rawset(GameData.Default.Tiles.DefaultTileset, "EmptyCollider",{quad=emptyQuad, collision=true})
+rawset(GameData.Default.Tiles.DefaultTileset, "Empty",{quad=emptyQuad, collision=false})
 local out={}
 for k, v in orderedTable {
 
@@ -97,7 +95,7 @@ for k, v in orderedTable {
     t.id=v[1]
     t.prefix="Default"
     if (v[2]==emptyQuad) {
-        t.tileset="Empty"
+        t.tileset="DefaultTileset"
         t.type="Utility_Tile"
     } else {
         t.type="Basic_Tile"

@@ -13,7 +13,7 @@ LayeredTileMap.mouse={x=-1, y=-1}
 //z=1 == bottom layer
 //z=z == top layer
 method LayeredTileMap::initialize(x, y, z) {
-    self.debug=false
+    self.debug=true
     self.x=x
     self.y=y
     self.z=z
@@ -47,3 +47,6 @@ method LayeredTileMap::collisionOut() {
     }
     return out
 }
+
+
+return LayeredTileMap

@@ -100,16 +100,14 @@ _modules = {
 			GameData.Default.Tiles.DefaultTileset.GrassDLDarkUR = generateQuad24X(2+5, 9+5, GameData.Default.Images.DefaultTileset);
 			GameData.Default.Tiles.DefaultTileset.GrassDDarkU = generateQuad24X(3+5, 9+5, GameData.Default.Images.DefaultTileset);
 			GameData.Default.Tiles.DefaultTileset.GrassDRDarkUL = generateQuad24X(4+5, 9+5, GameData.Default.Images.DefaultTileset);
-			rawset(GameData.Default.Tiles.DefaultTileset, "Empty", nil);
-			GameData.Default.Tiles.Empty = {			};
-			GameData.Default.Tiles.Empty.EmptyCollider = {
+			rawset(GameData.Default.Tiles.DefaultTileset, "EmptyCollider", {
 				quad = emptyQuad, 
 				collision = true
-			};
-			GameData.Default.Tiles.Empty.Empty = {
+			});
+			rawset(GameData.Default.Tiles.DefaultTileset, "Empty", {
 				quad = emptyQuad, 
 				collision = false
-			};
+			});
 			local out = {			};
 			for k, v in ipairs(orderedTable) do
 				local t = Tile();
@@ -118,7 +116,7 @@ _modules = {
 				t.id = v[(1)];
 				t.prefix = "Default";
 				if (v[(2)]==emptyQuad) then
-					t.tileset = "Empty";
+					t.tileset = "DefaultTileset";
 					t.type = "Utility_Tile";
 				else
 					t.type = "Basic_Tile";
@@ -309,67 +307,164 @@ _modules = {
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('type')] = 'Basic_Tile';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('tileset')] = 'DefaultTileset';
 		GameData[('Default')][('TileMaps')][('DefaultTileMap')][('data')][(5)][(5)][('tilesetPrefix')] = 'Default';
+		GameData[('Default')][('TileMaps')][('SecondTileMap')] = {
+			data = {			}
+		};
+		GameData[('Default')][('TileMaps')][('SecondTileMap')] = TileMap:new(5, 5);
+		GameData[('Default')][('TileMaps')][('SecondTileMap')].name = 'SecondTileMap';
+		for x = 1, 5, 1 do
+			GameData[('Default')][('TileMaps')][('SecondTileMap')][('data')][(x)] = {			};
+			for y = 1, 5, 1 do
+				GameData[('Default')][('TileMaps')][('SecondTileMap')][('data')][(x)][(y)] = Tile:new();
+				GameData[('Default')][('TileMaps')][('SecondTileMap')][('data')][(x)][(y)][('id')] = 'Empty';
+				GameData[('Default')][('TileMaps')][('SecondTileMap')][('data')][(x)][(y)][('prefix')] = 'Default';
+				GameData[('Default')][('TileMaps')][('SecondTileMap')][('data')][(x)][(y)][('type')] = 'Basic_Tile';
+				GameData[('Default')][('TileMaps')][('SecondTileMap')][('data')][(x)][(y)][('tileset')] = 'DefaultTileset';
+				GameData[('Default')][('TileMaps')][('SecondTileMap')][('data')][(x)][(y)][('tilesetPrefix')] = 'Default';
+			end
+		end
 		return GameData;
 	end,
-	["libs.gamestate"] = function()
-		local gamestate = {		};
-		log = import("libs.log");
-		local currstate = {
-			name = "initialstate"
-		};
-		function gamestate.switch(state)
-			local statename = state.name or "NONAME";
-			local currstatename = currstate.name or "NONAME";
-			log.custom("GAMESTATE", "Switching To State: "..statename.." from state: "..currstatename);
-			if currstate.switchaway then
-				currstate.switchaway();
-			end
-			if state.switchto then
-				state.switchto();
-			end
-			for k, v in pairs(state) do
-				if k~='content' and k~='name' and k~='switchaway' and k~='switchto' and k~='quit' then
-					love[(k)] = v;
-				end
-			end
-			currstate = state;
-		end
-		function gamestate.getStateName()
-			return currstate.name;
-		end
-		log.custom("GAMESTATE", "Loaded");
-		return gamestate;
-	end,
-	["libs.gui"] = function()
-		local flux = require("libs.flux");
-		local dump = require("libs.dump");
+	["libs.gui.elements.BasicButton"] = function()
 		local Class = require("libs.class");
-		local mathExtensions = import("libs.Math");
-		local fontCache = {		};
-		fontCache[(12)] = love.graphics.newFont(12);
-		fontCache[(14)] = love.graphics.newFont(14);
+		local BasicButton = Class("BasicButton");
+		local button = import("libs.gui.mixins.Button");
+		local drawable = import("libs.gui.mixins.Drawable");
+		BasicButton:include(button);
+		BasicButton:include(drawable);
+		function BasicButton:initialize(x, y, active, width, height, canvas)
+			self:initButton(x, y, active, width, height);
+			self:initDrawable(x, y, canvas, width, height);
+		end
+		return BasicButton;
+	end,
+	["libs.gui.elements.BasicDrawable"] = function()
+		local Class = require("libs.class");
+		local BasicDrawable = Class("BasicDrawable");
+		local drawable = import("libs.gui.mixins.Drawable");
+		BasicDrawable:include(drawable);
+		function BasicDrawable:initialize(x, y, canvas, width, height)
+			self:initDrawable(x, y, canvas, width, height);
+		end
+		return BasicDrawable;
+	end,
+	["libs.gui.elements.BasicLayeredTileMap"] = function()
+		local Class = require("libs.class");
+		local BasicLayeredTileMap = Class("BasicLayeredTileMap");
+		local LayeredTileMapMixin = import("libs.gui.mixins.LayeredGuiTileMap");
+		BasicLayeredTileMap:include(LayeredTileMapMixin);
+		function BasicLayeredTileMap:initialize(x, y, sx, sy, map)
+			self.x = x;
+			self.y = y;
+			self._sx = sx;
+			self._sy = sy;
+			self:initLayeredTileMap(map);
+		end
+		function BasicLayeredTileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
+			rx = rx or 0;
+			ry = ry or 0;
+			sx = sx or 1;
+			sy = sy or 1;
+			LayeredTileMapMixin.draw(self, rx+self.x, ry+self.y, r, sx*self._sx, sy*self._sy, ox, oy, kx, ky);
+		end
+		return BasicLayeredTileMap;
+	end,
+	["libs.gui.elements.BasicTileMap"] = function()
+		local Class = require("libs.class");
+		local BasicTileMap = Class("BasicTileMap");
+		local TileMapMixin = import("libs.gui.mixins.GuiTileMap");
+		BasicTileMap:include(TileMapMixin);
+		function BasicTileMap:initialize(x, y, sx, sy, map)
+			self.x = x;
+			self.y = y;
+			self._sx = sx;
+			self._sy = sy;
+			self:initTileMap(map);
+		end
+		function BasicTileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
+			rx = rx or 0;
+			ry = ry or 0;
+			sx = sx or 1;
+			sy = sy or 1;
+			TileMapMixin.draw(self, rx+self.x, ry+self.y, r, sx*self._sx, sy*self._sy, ox, oy, kx, ky);
+		end
+		return BasicTileMap;
+	end,
+	["libs.gui.elements.InvisibleButton"] = function()
+		local Class = require("libs.class");
+		local InvisibleButton = Class("InvisibleButton");
+		local button = import("libs.gui.mixins.Button");
+		InvisibleButton:include(button);
+		function InvisibleButton:initialize(x, y, active, width, height)
+			self:initButton(x, y, active, width, height);
+		end
+		return InvisibleButton;
+	end,
+	["libs.gui.elements.TextBox"] = function()
+		local Class = require("libs.class");
+		local TextBox = Class("TextBox");
+		local text = import("libs.gui.mixins.Text");
+		local rectangle = import("libs.gui.mixins.Rectangle");
+		local drawable = import("libs.gui.mixins.Drawable");
+		TextBox:include(text);
+		TextBox:include(rectangle);
+		function TextBox:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
+		end
+		function TextBox:initialize(x, y, color, width, height, fontsize, text, align)
+			self:initRectangle(x, y, color, width, height);
+			self:initText(fontsize, width, height, text, align);
+		end
+		function TextBox:update(dt, x, y)
+			self:updateRectangle(dt, x, y);
+		end
+		return TextBox;
+	end,
+	["libs.gui.elements.TextBoxButton"] = function()
+		local Class = require("libs.class");
+		local TextBoxButton = Class("TextBoxButton");
+		local button = import("libs.gui.mixins.Button");
+		local text = import("libs.gui.mixins.Text");
+		local rectangle = import("libs.gui.mixins.Rectangle");
+		local drawable = import("libs.gui.mixins.Drawable");
+		TextBoxButton:include(button);
+		TextBoxButton:include(text);
+		TextBoxButton:include(rectangle);
+		function TextBoxButton:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
+		end
+		function TextBoxButton:initialize(x, y, color, width, height, fontsize, text, active, align)
+			self:initButton(x, y, active, width, height);
+			self:initRectangle(x, y, color, width, height);
+			self:initText(fontsize, width, height, text, align);
+		end
+		function TextBoxButton:update(dt, x, y)
+			button.update(self, dt);
+			self:updateRectangle(dt, x, y);
+		end
+		return TextBoxButton;
+	end,
+	["libs.gui.elements.Wrapper"] = function()
+		local Class = require("libs.class");
+		local ClickCache = import("libs.gui.subsystems.ClickCache");
 		local backgroundColor = {
-			0.2, 
-			0.2, 
-			0.2, 
+			0.5, 
+			0.5, 
+			0.5, 
 			1
 		};
-		function fontCache:getFont(num)
-			if (not fontCache[(num)]) then
-				fontCache[(num)] = love.graphics.newFont(num);
-			end
-			return fontCache[(num)];
-		end
-		for k, v in pairs(mathExtensions) do
-			math[(k)] = v;
-		end
-		local clickCache = {		};
+		local flux = require("libs.flux");
 		local GUI = Class("GUI");
 		function GUI:initialize()
 			self.children = {			};
 		end
 		function GUI:add(child)
 			table.insert(self.children, child);
+			return #self.children;
 		end
 		function GUI:background()
 			local oldColor = {
@@ -394,11 +489,65 @@ _modules = {
 				end
 			end
 		end
-		local function click(x, y, button)
-			if button==1 then
-				table.insert(clickCache, math.Point2D(x, y));
+		function GUI:clean()
+			ClickCache.clear();
+		end
+		GUI.click = function(x, y, button)
+			ClickCache.click(x, y, button);
+		end;
+		return GUI;
+	end,
+	["libs.gui.gui"] = function()
+		local out = {		};
+		out.register = function(name, class)
+			out[(name)] = class;
+		end;
+		return out;
+	end,
+	["libs.gui.mixins.Active"] = function()
+		local active = {		};
+		function active:setActive(bool)
+			self.active = bool;
+		end
+		function active:getActive()
+			return self.active;
+		end
+		return active;
+	end,
+	["libs.gui.mixins.Button"] = function()
+		local button = {		};
+		local active = import("libs.gui.mixins.Active");
+		local ClickCache = import("libs.gui.subsystems.ClickCache");
+		function button:initButton(x, y, active, width, height)
+			self.x = x;
+			self.y = y;
+			self.width = width;
+			self.height = height;
+			self.upperLeft = math.Point2D(x, y);
+			self.bottomRight = math.Point2D(x+width, y+height);
+			self:setActive(active);
+			self.clickFunctions = {			};
+		end
+		function button:included(klass)
+			klass:include(active);
+		end
+		function button:update(dt)
+			if self:getActive() then
+				for _, point in ipairs(ClickCache.getCache()) do
+					if (point.x>=self.upperLeft.x and point.x<=self.bottomRight.x and point.y>=self.upperLeft.y and point.y<=self.bottomRight.y) then
+						for _, v in ipairs(self.clickFunctions) do
+							v(self);
+						end
+					end
+				end
 			end
 		end
+		function button:onClick(func)
+			table.insert(self.clickFunctions, func);
+		end
+		return button;
+	end,
+	["libs.gui.mixins.Drawable"] = function()
 		local drawable = {		};
 		function drawable:initDrawable(x, y, canvas, width, height)
 			self.x = x;
@@ -416,184 +565,16 @@ _modules = {
 			y = y or self.y;
 			love.graphics.draw(self.drawable, x, y, r, sx, sy, ox, oy, kx, ky);
 		end
-		local text = {		};
-		function text:initText(fontsize, width, height, text, align)
-			self.fontsize = fontsize;
-			self.align = align or "left";
-			self.width = width;
-			self.height = height;
-			self.font = fontCache:getFont(fontsize);
-			self.text = love.graphics.newText(self.font);
-			self.textCanvas = love.graphics.newCanvas(self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
-			self.text:setf(text, width-(20*2), self.align);
-		end
-		function text:drawText(x, y, r, sx, sy, ox, oy, kx, ky)
-			x = x or 0;
-			y = y or 0;
-			local oldCanvas = love.graphics.getCanvas();
-			love.graphics.setCanvas(self.textCanvas);
-			love.graphics.clear();
-			local a, b, c, d = love.graphics.getScissor();
-			love.graphics.setScissor(0, 0, self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
-			love.graphics.draw(self.text);
-			love.graphics.setScissor(a, b, c, d);
-			love.graphics.setCanvas(oldCanvas);
-			love.graphics.push();
-			love.graphics.translate(self.x+x+20+(self.width-(20*2))/2, self.y+y+20+(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2);
-			love.graphics.scale(self.sx, self.sy);
-			love.graphics.draw(self.textCanvas, -(self.width-(20*2))/2, -(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2, r, sx, sy, ox, oy, kx, ky);
-			love.graphics.pop();
-		end
-		function text:updateText(text)
-			self.text:setf(text, self.width-(20*2), self.align);
-		end
-		local active = {		};
-		function active:setActive(bool)
-			self.active = bool;
-		end
-		function active:getActive()
-			return self.active;
-		end
-		local rectangle = {		};
-		function rectangle:initRectangle(x, y, color, width, height)
-			self:initDrawable(x, y, true, width, height);
-			self.rectangleCanvas = love.graphics.newCanvas(width, height);
-			self.color = color;
-			self.sx = 1;
-			self.sy = 1;
-			self.tween = nil;
-			self.hovered = false;
-		end
-		function rectangle:drawRectangle(x, y, rotation, sx, sy, ox, oy, kx, ky)
-			local x = x or 0;
-			local y = y or 0;
-			local sx = sx or 1;
-			local sy = sy or 1;
-			local r = r or 0;
-			local oldCanvas = love.graphics.getCanvas();
-			love.graphics.setCanvas(self.rectangleCanvas);
-			local a, b, c, d = love.graphics.getScissor();
-			love.graphics.setScissor();
-			love.graphics.clear();
-			love.graphics.setScissor(a, b, c, d);
-			local r, g, b, a = love.graphics.getColor();
-			love.graphics.setColor(self.color);
-			love.graphics.rectangle("fill", 0, 0, self.width, self.height, 20, 20);
-			love.graphics.setColor(self.color[(1)]*0.5, self.color[(2)]*0.5, self.color[(3)]*0.5, self.color[(4)]);
-			local oldWidth = love.graphics.getLineWidth();
-			love.graphics.setLineWidth(20);
-			love.graphics.rectangle("line", 20/2, 20/2, self.width-20, self.height-20, 20*0.45, 20*0.45);
-			love.graphics.setLineWidth(oldWidth);
-			love.graphics.setCanvas(oldCanvas);
-			love.graphics.setColor(r, g, b, a);
-			love.graphics.push();
-			love.graphics.translate(self.x+(self.width/2), self.y+(self.height/2));
-			love.graphics.scale(self.sx, self.sy);
-			love.graphics.draw(self.rectangleCanvas, (-self.width/2)+x, (-self.height/2)+y, rotation, sx, sy, ox, oy, kx, ky);
-			love.graphics.pop();
-		end
-		function rectangle:updateRectangle(dt, x, y)
-			if (self.clickFunctions and x>=self.x and x<=(self.x+self.width) and y>=self.y and y<=(self.y+self.height)) then
-				if not self.tween then
-					self.tween = flux.to(self, 0.5, {
-						sx = 1.2, 
-						sy = 1.2
-					});
-				end
-			elseif (self.tween) then
-				self.tween:stop();
-				self.tween = nil;
-				self.sx = 1;
-				self.sy = 1;
-			end
-		end
-		function rectangle:included(klass)
-			klass:include(active);
-			klass:include(drawable);
-		end
-		local button = {		};
-		function button:initButton(x, y, active, width, height)
-			self.x = x;
-			self.y = y;
-			self.width = width;
-			self.height = height;
-			self.upperLeft = math.Point2D(x, y);
-			self.bottomRight = math.Point2D(x+width, y+height);
-			self:setActive(active);
-			self.clickFunctions = {			};
-		end
-		function button:included(klass)
-			klass:include(active);
-		end
-		function button:update(dt)
-			if self:getActive() then
-				for _, point in ipairs(clickCache) do
-					if (point.x>=self.upperLeft.x and point.x<=self.bottomRight.x and point.y>=self.upperLeft.y and point.y<=self.bottomRight.y) then
-						for _, v in ipairs(self.clickFunctions) do
-							v(self);
-						end
-					end
-				end
-			end
-		end
-		function button:onClick(func)
-			table.insert(self.clickFunctions, func);
-		end
-		local InvisibleButton = Class("InvisibleButton");
-		InvisibleButton:include(button);
-		function InvisibleButton:initialize(x, y, active, width, height)
-			self:initButton(x, y, active, width, height);
-		end
-		local BasicButton = Class("BasicButton");
-		BasicButton:include(button);
-		BasicButton:include(drawable);
-		function BasicButton:initialize(x, y, active, width, height, canvas)
-			self:initButton(x, y, active, width, height);
-			self:initDrawable(x, y, canvas, width, height);
-		end
-		local TextBox = Class("TextBox");
-		TextBox:include(text);
-		TextBox:include(rectangle);
-		function TextBox:draw(x, y, r, sx, sy, ox, oy, kx, ky)
-			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
-		end
-		function TextBox:initialize(x, y, color, width, height, fontsize, text, align)
-			self:initRectangle(x, y, color, width, height);
-			self:initText(fontsize, width, height, text, align);
-		end
-		function TextBox:update(dt, x, y)
-			self:updateRectangle(dt, x, y);
-		end
-		local TextBoxButton = Class("TextBoxButton");
-		TextBoxButton:include(button);
-		TextBoxButton:include(text);
-		TextBoxButton:include(rectangle);
-		function TextBoxButton:draw(x, y, r, sx, sy, ox, oy, kx, ky)
-			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
-		end
-		function TextBoxButton:initialize(x, y, color, width, height, fontsize, text, active, align)
-			self:initButton(x, y, active, width, height);
-			self:initRectangle(x, y, color, width, height);
-			self:initText(fontsize, width, height, text, align);
-		end
-		function TextBoxButton:update(dt, x, y)
-			button.update(self, dt);
-			self:updateRectangle(dt, x, y);
-		end
-		local BasicDrawable = Class("BasicDrawable");
-		BasicDrawable:include(drawable);
-		function BasicDrawable:initialize(x, y, canvas, width, height)
-			self:initDrawable(x, y, canvas, width, height);
-		end
+		return drawable;
+	end,
+	["libs.gui.mixins.GuiTileMap"] = function()
 		local TileMapMixin = {		};
 		function TileMapMixin:initTileMap(map)
 			self.map = map;
 			self.clickFunctions = {			};
 		end
+		local flux = require("libs.flux");
+		local ClickCache = import("libs.gui.subsystems.ClickCache");
 		function TileMapMixin:update(dt, x, y)
 			self.map.mouse = {
 				x = x, 
@@ -677,37 +658,185 @@ _modules = {
 		function TileMapMixin:onClick(func)
 			table.insert(self.clickFunctions, func);
 		end
-		local BasicTileMap = Class("BasicTileMap");
-		BasicTileMap:include(TileMapMixin);
-		function BasicTileMap:initialize(x, y, sx, sy, map)
-			self.x = x;
-			self.y = y;
-			self._sx = sx;
-			self._sy = sy;
-			self:initTileMap(map);
+		return TileMapMixin;
+	end,
+	["libs.gui.mixins.LayeredGuiTileMap"] = function()
+		local LayeredTileMapMixin = {		};
+		function LayeredTileMapMixin:initLayeredTileMap(map)
+			self.map = map;
+			self.debug = true;
 		end
-		function BasicTileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
-			rx = rx or 0;
-			ry = ry or 0;
-			sx = sx or 1;
-			sy = sy or 1;
-			TileMapMixin.draw(self, rx+self.x, ry+self.y, r, sx*self._sx, sy*self._sy, ox, oy, kx, ky);
+		function LayeredTileMapMixin:update(dt, x, y)
+			
+		end
+		function LayeredTileMapMixin:setDebug(val)
+			self.debug = val;
+		end
+		local function Array2DSize(arr)
+			local lim = 0;
+			for i = 1, #arr, 1 do
+				if lim<=#arr[(i)] then
+					lim = #arr[(i)];
+				end
+			end
+			return lim;
+		end
+		function LayeredTileMapMixin:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
+			local sx = sx or 1;
+			local sy = sy or 1;
+			self.sx = sx;
+			self.sy = sy;
+			self.rx = rx;
+			self.ry = ry;
+			for i = 1, #self.map.layers, 1 do
+				for y = 1, Array2DSize(self.map.layers[(1)].data), 1 do
+					for x = 1, #self.map.layers[(1)].data, 1 do
+						love.graphics.push();
+						love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
+						self.map.layers[(i)].data[(x)][(y)]:draw(x, y, r, sx, sy, ox, oy, kx, ky, self.debug);
+						love.graphics.pop();
+					end
+				end
+			end
+		end
+		return LayeredTileMapMixin;
+	end,
+	["libs.gui.mixins.Rectangle"] = function()
+		local rectangle = {		};
+		local drawable = import("libs.gui.mixins.Drawable");
+		local active = import("libs.gui.mixins.Active");
+		local flux = require("libs.flux");
+		function rectangle:initRectangle(x, y, color, width, height)
+			self:initDrawable(x, y, true, width, height);
+			self.rectangleCanvas = love.graphics.newCanvas(width, height);
+			self.color = color;
+			self.sx = 1;
+			self.sy = 1;
+			self.tween = nil;
+			self.hovered = false;
+		end
+		function rectangle:drawRectangle(x, y, rotation, sx, sy, ox, oy, kx, ky)
+			local x = x or 0;
+			local y = y or 0;
+			local sx = sx or 1;
+			local sy = sy or 1;
+			local r = r or 0;
+			local oldCanvas = love.graphics.getCanvas();
+			love.graphics.setCanvas(self.rectangleCanvas);
+			local a, b, c, d = love.graphics.getScissor();
+			love.graphics.setScissor();
+			love.graphics.clear();
+			love.graphics.setScissor(a, b, c, d);
+			local r, g, b, a = love.graphics.getColor();
+			love.graphics.setColor(self.color);
+			love.graphics.rectangle("fill", 0, 0, self.width, self.height, 20, 20);
+			love.graphics.setColor(self.color[(1)]*0.5, self.color[(2)]*0.5, self.color[(3)]*0.5, self.color[(4)]);
+			local oldWidth = love.graphics.getLineWidth();
+			love.graphics.setLineWidth(20);
+			love.graphics.rectangle("line", 20/2, 20/2, self.width-20, self.height-20, 20*0.45, 20*0.45);
+			love.graphics.setLineWidth(oldWidth);
+			love.graphics.setCanvas(oldCanvas);
+			love.graphics.setColor(r, g, b, a);
+			love.graphics.push();
+			love.graphics.translate(self.x+(self.width/2), self.y+(self.height/2));
+			love.graphics.scale(self.sx, self.sy);
+			love.graphics.draw(self.rectangleCanvas, (-self.width/2)+x, (-self.height/2)+y, rotation, sx, sy, ox, oy, kx, ky);
+			love.graphics.pop();
+		end
+		function rectangle:updateRectangle(dt, x, y)
+			if (self.clickFunctions and x>=self.x and x<=(self.x+self.width) and y>=self.y and y<=(self.y+self.height)) then
+				if not self.tween then
+					self.tween = flux.to(self, 0.5, {
+						sx = 1.2, 
+						sy = 1.2
+					});
+				end
+			elseif (self.tween) then
+				self.tween:stop();
+				self.tween = nil;
+				self.sx = 1;
+				self.sy = 1;
+			end
+		end
+		function rectangle:included(klass)
+			klass:include(active);
+			klass:include(drawable);
+		end
+		return rectangle;
+	end,
+	["libs.gui.mixins.Text"] = function()
+		local text = {		};
+		local fontCache = import("libs.gui.subsystems.FontCache");
+		function text:initText(fontsize, width, height, text, align)
+			self.fontsize = fontsize;
+			self.align = align or "left";
+			self.width = width;
+			self.height = height;
+			self.font = fontCache:getFont(fontsize);
+			self.text = love.graphics.newText(self.font);
+			self.textCanvas = love.graphics.newCanvas(self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
+			self.text:setf(text, width-(20*2), self.align);
+		end
+		function text:drawText(x, y, r, sx, sy, ox, oy, kx, ky)
+			x = x or 0;
+			y = y or 0;
+			local oldCanvas = love.graphics.getCanvas();
+			love.graphics.setCanvas(self.textCanvas);
+			love.graphics.clear();
+			local a, b, c, d = love.graphics.getScissor();
+			love.graphics.setScissor(0, 0, self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
+			love.graphics.draw(self.text);
+			love.graphics.setScissor(a, b, c, d);
+			love.graphics.setCanvas(oldCanvas);
+			love.graphics.push();
+			love.graphics.translate(self.x+x+20+(self.width-(20*2))/2, self.y+y+20+(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2);
+			love.graphics.scale(self.sx, self.sy);
+			love.graphics.draw(self.textCanvas, -(self.width-(20*2))/2, -(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2, r, sx, sy, ox, oy, kx, ky);
+			love.graphics.pop();
+		end
+		function text:updateText(text)
+			self.text:setf(text, self.width-(20*2), self.align);
+		end
+		return text;
+	end,
+	["libs.gui.subsystems.ClickCache"] = function()
+		local clickCache = {		};
+		local mathExtensions = import("libs.util.Math");
+		for k, v in pairs(mathExtensions) do
+			math[(k)] = v;
+		end
+		local function click(x, y, button)
+			if button==1 then
+				table.insert(clickCache, math.Point2D(x, y));
+			end
 		end
 		local out = {		};
-		out.GUI = GUI;
 		out.click = click;
-		out.BasicButton = BasicButton;
-		out.BasicDrawable = BasicDrawable;
-		out.InvisibleButton = InvisibleButton;
-		out.BasicTileMap = BasicTileMap;
-		out.TextBox = TextBox;
-		out.TextBoxButton = TextBoxButton;
-		out.clickCache = clickCache;
-		function GUI:clean()
+		out.clear = function()
 			clickCache = {			};
-			out.clickCache = clickCache;
-		end
+		end;
+		out.getCache = function()
+			return clickCache;
+		end;
 		return out;
+	end,
+	["libs.gui.subsystems.FontCache"] = function()
+		local fontCache = {		};
+		fontCache[(12)] = love.graphics.newFont(12);
+		fontCache[(14)] = love.graphics.newFont(14);
+		local backgroundColor = {
+			0.2, 
+			0.2, 
+			0.2, 
+			1
+		};
+		function fontCache:getFont(num)
+			if (not fontCache[(num)]) then
+				fontCache[(num)] = love.graphics.newFont(num);
+			end
+			return fontCache[(num)];
+		end
+		return fontCache;
 	end,
 	["libs.Item"] = function()
 		Class = require("libs.class");
@@ -782,7 +911,7 @@ _modules = {
 			y = -1
 		};
 		function LayeredTileMap:initialize(x, y, z)
-			self.debug = false;
+			self.debug = true;
 			self.x = x;
 			self.y = y;
 			self.z = z;
@@ -816,6 +945,7 @@ _modules = {
 			end
 			return out;
 		end
+		return LayeredTileMap;
 	end,
 	["libs.log"] = function()
 		local function Log(level, msg)
@@ -837,86 +967,6 @@ _modules = {
 		log.custom = Log;
 		log.custom("LOG", "Loaded");
 		return log;
-	end,
-	["libs.Math"] = function()
-		local Class = require("libs.class");
-		local Point2D = Class("Point2D");
-		local Vector2D = Class("Vector2D");
-		Point2D.__eq = function(point1, point2)
-			return point1.x==point2.x and point1.y==point2.y;
-		end;
-		Point2D.__tostring = function(point)
-			return "2D Point: {"..point.x..", "..point.y.."}";
-		end;
-		function Point2D:initialize(x, y)
-			self.x = x;
-			self.y = y;
-		end
-		Vector2D.__eq = function(vector1, vector2)
-			return vector1.x==vector2.x and vector1.y==vector2.y;
-		end;
-		Vector2D.__tostring = function(vector)
-			return "2D Vector: {X "..vector.x..", Y "..vector.y..", Angle (Radians) "..vector:getAngle()..", MAGNITUDE "..vector:getMagnitude().."}";
-		end;
-		function Vector2D:getMagnitude()
-			return (((self.x^2)+(self.y^2))^0.5);
-		end
-		function Vector2D:getAngle()
-			return math.atan2(self.y, self.x);
-		end
-		function Vector2D:initialize(x, y, mode)
-			if (mode=="Polar") then
-				self.x = math.cos(x)*y;
-				self.y = math.sin(x)*y;
-			else
-				self.x = x;
-				self.y = y;
-			end
-		end
-		function Vector2D:apply(vector)
-			return Vector2D(self.x+vector.x, self.y+vector.y);
-		end
-		function Vector2D.fromPoint(point)
-			return Vector2D(point.x, point.y);
-		end
-		function Vector2D:multiply(vector)
-			return Vector2D(self.x*vector.x, self.y*vector.y);
-		end
-		function Vector2D:toPoint()
-			return Point2D.fromVector(self);
-		end
-		function Point2D:distanceToPoint(point)
-			return ((self.x-point.x)^2+(self.y-point.y)^2)^0.5;
-		end
-		function Point2D:toVector()
-			return Vector2D.fromPoint(self);
-		end
-		function Point2D.fromVector(vector)
-			return Point2D(vector.x, vector.y);
-		end
-		function Point2D:rotate(rotation, centerPoint)
-			centerPoint = centerPoint;
-			Point2D(0, 0);
-			local newX = ((self.x-centerPoint.x)*math.cos(rotation)-(self.y-centerPoint.y)*math.sin(rotation))+centerPoint.x;
-			local newX = ((self.xy-centerPoint.x)*math.sin(rotation)+(self.y-centerPoint.y)*math.cos(rotation))+centerPoint.y;
-			return Point2D(newX, newY);
-		end
-		function Point2D:translate(vector)
-			return Point2D(self.x+vector.x, self.y+vector.y);
-		end
-		local negativeVector = Vector2D(-1, -1);
-		function Point2D:scale(scaleVector, centerVector)
-			return self:toVector():apply(centerVector:multiply(negativeVector)):multiply(scaleVector):apply(centerVector):toPoint();
-		end
-		local out = {		};
-		out.Point2D = Point2D;
-		out.Vector2D = Vector2D;
-		return out;
-	end,
-	["libs.settings"] = function()
-		local settings = {		};
-		local stgs;
-		return settings;
 	end,
 	["libs.tile"] = function()
 		Class = require("libs.class");
@@ -1082,7 +1132,26 @@ _modules = {
 			return out;
 		end
 		function TileMap:isFull()
-			
+			local out = true;
+			for x = 1, self.x, 1 do
+				local needBreak = false;
+				if self.data[(x)] then
+					for y = 1, self.y, 1 do
+						if not self.data[(x)][(y)] then
+							out = false;
+							needBreak = true;
+							break;
+						end
+					end
+					if needBreak then
+						break;
+					end
+				else
+					out = false;
+					break;
+				end
+			end
+			return out;
 		end
 		function TileMap.fromTable(tbl)
 			local rmvTotal = 0;
@@ -1184,6 +1253,8 @@ _modules = {
 		end
 		function TileMap:extend(left, right, up, down, func)
 			extend2DArray(self.data, left, right, down, up, func or self.newBasicTile);
+			self.x = self.x + left+right;
+			self.y = self.y + up+down;
 		end
 		function TileMap:setDebug(val)
 			self.debug = val;
@@ -1220,14 +1291,123 @@ _modules = {
 		end
 		return TileMap;
 	end,
-	["libs.util"] = function()
+	["libs.util.gamestate"] = function()
+		local gamestate = {		};
+		log = import("libs.log");
+		local currstate = {
+			name = "initialstate"
+		};
+		function gamestate.switch(state)
+			local statename = state.name or "NONAME";
+			local currstatename = currstate.name or "NONAME";
+			log.custom("GAMESTATE", "Switching To State: "..statename.." from state: "..currstatename);
+			if currstate.switchaway then
+				currstate.switchaway();
+			end
+			if state.switchto then
+				state.switchto();
+			end
+			for k, v in pairs(state) do
+				if k~='content' and k~='name' and k~='switchaway' and k~='switchto' and k~='quit' then
+					love[(k)] = v;
+				end
+			end
+			currstate = state;
+		end
+		function gamestate.getStateName()
+			return currstate.name;
+		end
+		log.custom("GAMESTATE", "Loaded");
+		return gamestate;
+	end,
+	["libs.util.Math"] = function()
+		local Class = require("libs.class");
+		local Point2D = Class("Point2D");
+		local Vector2D = Class("Vector2D");
+		Point2D.__eq = function(point1, point2)
+			return point1.x==point2.x and point1.y==point2.y;
+		end;
+		Point2D.__tostring = function(point)
+			return "2D Point: {"..point.x..", "..point.y.."}";
+		end;
+		function Point2D:initialize(x, y)
+			self.x = x;
+			self.y = y;
+		end
+		Vector2D.__eq = function(vector1, vector2)
+			return vector1.x==vector2.x and vector1.y==vector2.y;
+		end;
+		Vector2D.__tostring = function(vector)
+			return "2D Vector: {X "..vector.x..", Y "..vector.y..", Angle (Radians) "..vector:getAngle()..", MAGNITUDE "..vector:getMagnitude().."}";
+		end;
+		function Vector2D:getMagnitude()
+			return (((self.x^2)+(self.y^2))^0.5);
+		end
+		function Vector2D:getAngle()
+			return math.atan2(self.y, self.x);
+		end
+		function Vector2D:initialize(x, y, mode)
+			if (mode=="Polar") then
+				self.x = math.cos(x)*y;
+				self.y = math.sin(x)*y;
+			else
+				self.x = x;
+				self.y = y;
+			end
+		end
+		function Vector2D:apply(vector)
+			return Vector2D(self.x+vector.x, self.y+vector.y);
+		end
+		function Vector2D.fromPoint(point)
+			return Vector2D(point.x, point.y);
+		end
+		function Vector2D:multiply(vector)
+			return Vector2D(self.x*vector.x, self.y*vector.y);
+		end
+		function Vector2D:toPoint()
+			return Point2D.fromVector(self);
+		end
+		function Point2D:distanceToPoint(point)
+			return ((self.x-point.x)^2+(self.y-point.y)^2)^0.5;
+		end
+		function Point2D:toVector()
+			return Vector2D.fromPoint(self);
+		end
+		function Point2D.fromVector(vector)
+			return Point2D(vector.x, vector.y);
+		end
+		function Point2D:rotate(rotation, centerPoint)
+			centerPoint = centerPoint;
+			Point2D(0, 0);
+			local newX = ((self.x-centerPoint.x)*math.cos(rotation)-(self.y-centerPoint.y)*math.sin(rotation))+centerPoint.x;
+			local newX = ((self.xy-centerPoint.x)*math.sin(rotation)+(self.y-centerPoint.y)*math.cos(rotation))+centerPoint.y;
+			return Point2D(newX, newY);
+		end
+		function Point2D:translate(vector)
+			return Point2D(self.x+vector.x, self.y+vector.y);
+		end
+		local negativeVector = Vector2D(-1, -1);
+		function Point2D:scale(scaleVector, centerVector)
+			return self:toVector():apply(centerVector:multiply(negativeVector)):multiply(scaleVector):apply(centerVector):toPoint();
+		end
+		local out = {		};
+		out.Point2D = Point2D;
+		out.Vector2D = Vector2D;
+		return out;
+	end,
+	["libs.util.settings"] = function()
+		local settings = {		};
+		local stgs;
+		return settings;
+	end,
+	["libs.util.util"] = function()
 		log = import("libs.log");
 		log.custom("UTIL", "Loaded");
 		function Test(a, b)
 			return a+b;
 		end
 	end,
-	["libs.wait"] = function()
+	["libs.util.wait"] = function()
 		local waitTable = {		};
 		log = import("libs.log");
 		local wait = setmetatable({		}, {
@@ -1296,32 +1476,39 @@ _modules = {
 			0, 
 			0
 		};
-		bump = nil;
+		bump = require("libs.bump");
 		Tile = nil;
 		TileMap = nil;
 		GUI = nil;
 		GameData = nil;
 		local function loadLibraries()
-			util = import("libs.util");
+			util = import("libs.util.util");
 			log = import("libs.log");
 			splash = require("libs.splash");
-			gamestate = import("libs.gamestate");
+			gamestate = import("libs.util.gamestate");
 			talkies = require("libs.talkies");
-			wait = import("libs.wait");
+			wait = import("libs.util.wait");
 			dump = require("libs.dump");
-			settings = import("libs.settings");
+			settings = import("libs.util.settings");
 			class = require("libs.class");
 			Item = import("libs.Item");
-			bump = require("libs.bump");
 			Tile = import("libs.tile");
 			TileMap = import("libs.TileMap");
 			GameData = import("libs.GameData");
 			LayeredTileMap = import("libs.LayeredTileMap");
-			local mathExtensions = import("libs.Math");
+			local mathExtensions = import("libs.util.Math");
 			for k, v in pairs(mathExtensions) do
 				math[(k)] = v;
 			end
-			GUI = import("libs.gui");
+			GUI = import("libs.gui.gui");
+			GUI.register("BasicButton", import("libs.gui.elements.BasicButton"));
+			GUI.register("BasicDrawable", import("libs.gui.elements.BasicDrawable"));
+			GUI.register("BasicTileMap", import("libs.gui.elements.BasicTileMap"));
+			GUI.register("InvisibleButton", import("libs.gui.elements.InvisibleButton"));
+			GUI.register("TextBox", import("libs.gui.elements.TextBox"));
+			GUI.register("TextBoxButton", import("libs.gui.elements.TextBoxButton"));
+			GUI.register("GUI", import("libs.gui.elements.Wrapper"));
+			GUI.register("BasicLayeredTileMap", import("libs.gui.elements.BasicLayeredTileMap"));
 		end
 		function love.resize(w, h)
 			push.resize(w, h);
@@ -1421,10 +1608,16 @@ _modules = {
 				local x, y = love.mouse.getPosition();
 				local x, y = push.toGame(x, y);
 				if x and y then
-					GUI.click(x, y, button);
+					gui.click(x, y, button);
 				end
 			end
 		else
+			local coll = {			};
+			local world = bump.newWorld(48);
+			local playing = {
+				name = "playing"
+			};
+			local player = {			};
 			local tile;
 			local gui;
 			tileset = {			};
@@ -1454,6 +1647,75 @@ _modules = {
 				self.gui:update(dt, x, y);
 				self.gui:clean();
 			end
+			function playing.switchto()
+				if (not playing.switched) then
+					local self = playing;
+					self.gui = GUI.GUI();
+					self.layeredMap = main.layeredMap;
+					self.button = GUI.TextBoxButton(240*2, 0, {
+						0, 
+						0, 
+						1, 
+						1
+					}, 1920-(240*4), 100, 36, "Tilemap Editor", true);
+					self.gui:add(self.button);
+					self.button:onClick(function(self, x, y)
+						gamestate.switch(main);
+					end);
+					self.layeredMap = GUI.BasicLayeredTileMap(0, 100, 2, 2, main.newMap);
+					self.gui:add(self.layeredMap);
+				end
+				playing.switched = true;
+			end
+			local function whatCollider(item, other)
+				if other.collision then
+					return "slide";
+				else
+					return "cross";
+				end
+			end
+			function playing.update(dt)
+				local collisionOut = main.layeredMap.map:collisionOut();
+				for x = 1, #main.map.map.data, 1 do
+					for y = 1, #main.map.map.data[(x)], 1 do
+						coll[(x)][(y)].collision = collisionOut[(x)][(y)];
+					end
+				end
+				local x = 0;
+				local y = 0;
+				if love.keyboard.isDown("w") then
+					y = y + -24;
+				end
+				if love.keyboard.isDown("s") then
+					y = y + 24;
+				end
+				if love.keyboard.isDown("a") then
+					x = x + -24;
+				end
+				if love.keyboard.isDown("d") then
+					x = x + 24;
+				end
+				player.ttx, player.tty = world:move(player, player.ttx+(x*dt), player.tty+(y*dt), whatCollider);
+				wait.update();
+				local x, y = love.mouse.getPosition();
+				local x, y = push.toGame(x, y);
+				if (love.system.getOS()=="Android") then
+					local touches = love.touch.getTouches();
+					if #touches==0 then
+						x, y = -1, -1;
+					end
+				end
+				local x = x or -1;
+				local y = y or -1;
+				playing.gui:update(dt, x, y);
+			end
+			function playing.draw()
+				push:start();
+				playing.gui:background();
+				playing.gui:draw();
+				love.graphics.rectangle("fill", player.ttx*2, 2*player.tty+100, 48, 48);
+				push:finish();
+			end
 			function tileset.switchto()
 				if (not tileset.switched) then
 					local self = tileset;
@@ -1476,10 +1738,11 @@ _modules = {
 			end
 			function main.draw()
 				push:start();
-				gui:background();
-				gui:draw();
+				main.gui:background();
+				main.gui:draw();
 				push:finish();
 			end
+			local index = 0;
 			function main.update(dt)
 				wait.update();
 				local x, y = love.mouse.getPosition();
@@ -1492,14 +1755,20 @@ _modules = {
 				end
 				local x = x or -1;
 				local y = y or -1;
-				gui:update(dt, x, y);
-				gui:clean();
+				main.gui:update(dt, x, y);
+				main.gui:clean();
 			end
 			main.switched = false;
 			function main.switchto()
+				local self = main;
 				if (not main.switched) then
-					main.map = GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileMap);
+					main.map = GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.SecondTileMap);
+					main.map2 = GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileMap);
 					tileset.map = GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileset);
+					local newMap = LayeredTileMap(9, 9, 0);
+					self.newMap = newMap;
+					newMap.layers[(1)] = GameData.Default.TileMaps.DefaultTileMap;
+					newMap.layers[(2)] = GameData.Default.TileMaps.SecondTileMap;
 					tile = main.map.map:newBasicTile();
 					local textboxbutton = GUI.TextBoxButton(240*2, 0, {
 						0, 
@@ -1507,28 +1776,87 @@ _modules = {
 						1, 
 						1
 					}, 1920-(240*4), 100, 36, "Tileset Picker", true);
+					local textboxbutton2 = GUI.TextBoxButton(1920-(240*2), 0, {
+						0, 
+						0, 
+						1, 
+						1
+					}, 240*2, 100, 36, "Background Layer", true);
+					local textboxbutton3 = GUI.TextBoxButton(1920-(240*2), 100, {
+						0, 
+						0, 
+						1, 
+						1
+					}, 240*2, 100, 36, "Front Layer", true);
+					local textboxbutton4 = GUI.TextBoxButton(1920-(240*2), 200, {
+						0, 
+						0, 
+						1, 
+						1
+					}, 240*2, 100, 36, "Playing", true);
 					textboxbutton:onClick(function(self, x, y)
 						gamestate.switch(tileset);
 					end);
+					textboxbutton4:onClick(function(self, x, y)
+						gamestate.switch(playing);
+					end);
+					textboxbutton2:onClick(function(self, x, y)
+						gui.children[(index)] = main.map2;
+					end);
+					textboxbutton3:onClick(function(self, x, y)
+						gui.children[(index)] = main.map;
+					end);
 					gui = GUI.GUI();
-					gui:add(main.map);
+					main.gui = gui;
+					index = gui:add(main.map);
 					gui:add(textboxbutton);
+					gui:add(textboxbutton2);
+					gui:add(textboxbutton3);
+					gui:add(textboxbutton4);
+					textboxbutton2:onClick(function(self, x, y)
+						gui.children[(index)] = main.map2;
+					end);
+					textboxbutton3:onClick(function(self, x, y)
+						gui.children[(index)] = main.map;
+					end);
+					main.layeredMap = GUI.BasicLayeredTileMap(600, 200, 2, 2, newMap);
+					gui:add(self.layeredMap);
 					main.map.interact = true;
 					main.map.map:setDebug(true);
+					main.map2.interact = true;
+					main.map2.map:setDebug(true);
 					main.map:onClick(function(self, x, y)
+						self.map.data[(x)][(y)] = tile:cloneTile();
+					end);
+					main.map2:onClick(function(self, x, y)
 						self.map.data[(x)][(y)] = tile:cloneTile();
 					end);
 					tileset.map:onClick(function(self, x, y)
 						tile = self.map.data[(x)][(y)]:cloneTile();
 					end);
+					local collisionOut = main.layeredMap.map:collisionOut();
+					for x = 1, #main.map.map.data, 1 do
+						coll[(x)] = {						};
+						for y = 1, #main.map.map.data[(x)], 1 do
+							coll[(x)][(y)] = {
+								collision = collisionOut[(x)][(y)]
+							};
+							world:add(coll[(x)][(y)], (x-1)*24+1, (y-1)*24+1, 22, 22);
+						end
+					end
+					world:add(player, 4*24, 4*24, 24, 24);
+					player.ttx = 4*24;
+					player.tty = 4*24;
 				end
 				main.switched = true;
+				self.layeredMap:setDebug(true);
+				self.gui:clean();
 			end
 			function main.mousereleased(x, y, button, istouch, presses)
 				local x, y = love.mouse.getPosition();
 				local x, y = push.toGame(x, y);
 				if x and y then
-					GUI.click(x, y, button);
+					gui.click(x, y, button);
 				end
 			end
 		end
@@ -1544,6 +1872,15 @@ _modules = {
 			newData[(1)][(5)] = Tile:new();
 			newData[(1)][(5)].id = "DirtULGrassDR";
 			GameData.Default.TileMaps.DefaultTileMap:extend(2, 2, 2, 2);
+			GameData.Default.TileMaps.SecondTileMap:extend(2, 2, 2, 2, function()
+				local DefaultTile = Tile:new();
+				DefaultTile[('id')] = 'Empty';
+				DefaultTile[('prefix')] = 'Default';
+				DefaultTile[('type')] = 'Basic_Tile';
+				DefaultTile[('tileset')] = 'DefaultTileset';
+				DefaultTile[('tilesetPrefix')] = 'Default';
+				return DefaultTile;
+			end);
 			Item.loadSubclasses();
 			Weapon = import("libs.Weapon");
 			local FirstWeapon = Weapon:new();

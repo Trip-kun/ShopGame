@@ -187,5 +187,19 @@ GameData['Default']['TileMaps']['DefaultTileMap']['data'][5][5]['type']='Basic_T
 GameData['Default']['TileMaps']['DefaultTileMap']['data'][5][5]['tileset']='DefaultTileset'
 GameData['Default']['TileMaps']['DefaultTileMap']['data'][5][5]['tilesetPrefix']='Default'
 
+GameData['Default']['TileMaps']['SecondTileMap']={data={}}
+GameData['Default']['TileMaps']['SecondTileMap']=TileMap::new(5,5)
+GameData['Default']['TileMaps']['SecondTileMap'].name='SecondTileMap'
+for x=1, 5 {
+GameData['Default']['TileMaps']['SecondTileMap']['data'][x]={}
+for y=1, 5 {
+GameData['Default']['TileMaps']['SecondTileMap']['data'][x][y]=Tile::new()
+GameData['Default']['TileMaps']['SecondTileMap']['data'][x][y]['id']='Empty'
+GameData['Default']['TileMaps']['SecondTileMap']['data'][x][y]['prefix']='Default'
+GameData['Default']['TileMaps']['SecondTileMap']['data'][x][y]['type']='Basic_Tile'
+GameData['Default']['TileMaps']['SecondTileMap']['data'][x][y]['tileset']='DefaultTileset'
+GameData['Default']['TileMaps']['SecondTileMap']['data'][x][y]['tilesetPrefix']='Default'
+}
+}
 //Return GameData to source requiring this file.
 return GameData

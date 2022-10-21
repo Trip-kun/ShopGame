@@ -14,4 +14,4 @@ method fontCache::getFont(num) {
     }
     return fontCache[num]
 }
-reurn fontCache
+return fontCache

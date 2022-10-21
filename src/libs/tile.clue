@@ -24,6 +24,7 @@ method Tile::getQuad() {
     return GameData[self.tilesetPrefix].Tiles[self.tileset][self.id].quad
 }
 method Tile::getCollision() {
+    //print(self.tilesetPrefix, self.tileset, self.id)
     return GameData[self.tilesetPrefix].Tiles[self.tileset][self.id].collision
 }
 method Tile::getTileset() {

@@ -16,7 +16,7 @@ global Item = nil
 global Weapon = nil
 global logo = nil
 global player = {100, 100, 24, 24, 0, 0}
-global bump = nil
+global bump = require("libs.bump")
 global Tile = nil
 global TileMap = nil
 global GUI=nil
@@ -32,7 +32,7 @@ local fn loadLibraries () {
             global settings = import("libs.util.settings")
             global class = require("libs.class")
             global Item = import("libs.Item")
-            global bump = require("libs.bump")
+
             global Tile = import("libs.tile")
             global TileMap = import("libs.TileMap")
             global GameData=import("libs.GameData")
@@ -50,6 +50,7 @@ local fn loadLibraries () {
             GUI.register("TextBox", import("libs.gui.elements.TextBox"))
             GUI.register("TextBoxButton", import("libs.gui.elements.TextBoxButton"))
             GUI.register("GUI", import("libs.gui.elements.Wrapper"))
+            GUI.register("BasicLayeredTileMap", import("libs.gui.elements.BasicLayeredTileMap"))
 }
 method love.resize(w, h) {
 push.resize(w, h)
@@ -137,6 +138,10 @@ if (mode=="editor") {
 
     }
 } else {
+        local coll={}
+               local world = bump.newWorld(48)
+       local playing={name="playing"}
+       local player={}
        local tile
        local gui
        tileset={}
@@ -169,6 +174,81 @@ if (mode=="editor") {
            self.gui::update(dt, x, y)
            self.gui::clean()
        }
+       method playing.switchto() {
+        if (!playing.switched) {
+            local self = playing
+            self.gui=GUI.GUI()
+
+            self.layeredMap=main.layeredMap
+
+            self.button=
+            GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tilemap Editor", true)
+            self.gui::add(self.button)
+                                       self.button::onClick(fn (self, x, y) {
+                                           gamestate.switch(main)
+
+
+                                       })
+            self.layeredMap=GUI.BasicLayeredTileMap(0, 100, 2, 2, main.newMap)
+                               self.gui::add(self.layeredMap)
+
+        }
+        playing.switched=true
+       }
+       local fn whatCollider(item, other) {
+                   if other.collision {
+
+                       return "slide"
+                   } else {
+                       return "cross"
+                   }
+              }
+       method playing.update(dt) {
+
+            local collisionOut=main.layeredMap.map::collisionOut()
+                               for x=1,#main.map.map.data {
+                                        for y=1, #main.map.map.data[x] {
+                                            coll[x][y].collision=collisionOut[x][y]
+
+                                        }
+                                          }
+
+            local x = 0
+            local y = 0
+            if love.keyboard.isDown("w") {
+                y+=-24
+            }
+            if love.keyboard.isDown("s") {
+                y+=24
+            }
+            if love.keyboard.isDown("a") {
+                x+=-24
+            }
+            if love.keyboard.isDown("d") {
+                x+=24
+            }
+            player.ttx, player.tty = world::move(player, player.ttx+ (x*dt), player.tty+ (y*dt), whatCollider)
+            wait.update()
+                       local x, y = love.mouse.getPosition()
+                       local x, y = push.toGame(x, y)
+                       if (love.system.getOS()=="Android") {
+                                   local touches=love.touch.getTouches()
+                                   if #touches==0 {
+                                       x, y = -1, -1
+                                   }
+                               }
+                       local x=x || -1
+                       local y=y || -1
+            playing.gui::update(dt, x, y)
+       }
+       method playing.draw() {
+       push::start()
+        playing.gui::background()
+                   playing.gui::draw()
+        love.graphics.rectangle("fill", player.ttx*2, 2*player.tty+100, 48, 48)
+        push::finish()
+       }
+
        method tileset.switchto() {
            if (!tileset.switched) {
 
@@ -194,14 +274,14 @@ if (mode=="editor") {
            push::start()
            //love.graphics.print("Hello World!")
            //local r, g, b, a = love.graphics.getColor()
-           gui::background()
-           gui::draw()
+           main.gui::background()
+           main.gui::draw()
            //love.graphics.setColor(1, 0, 1, 1)
            //love.graphics.rectangle("fill", mx, my, 24, 24)
            //love.graphics.setColor(r, g, b, a)
            push::finish()
        }
-
+        local index = 0;
        method main.update(dt) {
            wait.update()
            local x, y = love.mouse.getPosition()
@@ -214,36 +294,91 @@ if (mode=="editor") {
                    }
            local x=x || -1
            local y=y || -1
-           gui::update(dt, x, y)
-           gui::clean()
+           main.gui::update(dt, x, y)
+           main.gui::clean()
        }
+
+
        main.switched=false
        method main.switchto() {
+           local self=main
            if (!main.switched) {
-           main.map=GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileMap)
+
+           main.map=GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.SecondTileMap)
+           main.map2=GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileMap)
            tileset.map=GUI.BasicTileMap(20, 20, 2, 2, GameData.Default.TileMaps.DefaultTileset)
+            local newMap= LayeredTileMap(9, 9, 0)
+            self.newMap = newMap
+            newMap.layers[1]=GameData.Default.TileMaps.DefaultTileMap
+            newMap.layers[2]=GameData.Default.TileMaps.SecondTileMap
 
            tile=main.map.map::newBasicTile()
                    local textboxbutton=GUI.TextBoxButton(240*2, 0, {0, 0, 1, 1}, 1920-(240*4), 100, 36, "Tileset Picker", true)
-
+                   local textboxbutton2=GUI.TextBoxButton(1920-(240*2), 0, {0, 0, 1, 1}, 240*2, 100, 36, "Background Layer", true)
+                   local textboxbutton3=GUI.TextBoxButton(1920-(240*2), 100, {0, 0, 1, 1}, 240*2, 100, 36, "Front Layer", true)
+                   local textboxbutton4=GUI.TextBoxButton(1920-(240*2), 200, {0, 0, 1, 1}, 240*2, 100, 36, "Playing", true)
                textboxbutton::onClick(fn (self, x, y) {
                    gamestate.switch(tileset)
 
 
                })
+               textboxbutton4::onClick(fn (self, x, y) {
+                                  gamestate.switch(playing)
+
+
+                              })
+               textboxbutton2::onClick(fn (self, x, y) {
+                    gui.children[index]=main.map2
+               })
+                textboxbutton3::onClick(fn (self, x, y) {
+                    gui.children[index]=main.map
+                })
        gui=GUI.GUI()
-       gui::add(main.map)
+       main.gui=gui
+       index = gui::add(main.map)
        gui::add(textboxbutton)
+       gui::add(textboxbutton2)
+       gui::add(textboxbutton3)
+       gui::add(textboxbutton4)
+       textboxbutton2::onClick(fn (self, x, y) {
+                           gui.children[index]=main.map2
+                      })
+                       textboxbutton3::onClick(fn (self, x, y) {
+                           gui.children[index]=main.map
+                       })
+                       main.layeredMap=GUI.BasicLayeredTileMap(600, 200, 2, 2, newMap)
+       gui::add(self.layeredMap)
            main.map.interact=true
            main.map.map::setDebug(true)
+           main.map2.interact=true
+           main.map2.map::setDebug(true)
            main.map::onClick(fn (self, x, y) {
                self.map.data[x][y]=tile::cloneTile()
            })
+           main.map2::onClick(fn (self, x, y) {
+                          self.map.data[x][y]=tile::cloneTile()
+                      })
            tileset.map::onClick(fn (self, x, y) {
                        tile=self.map.data[x][y]::cloneTile()
                    })
+
+                   local collisionOut=main.layeredMap.map::collisionOut()
+                   for x=1,#main.map.map.data {
+                            coll[x]={}
+                            for y=1, #main.map.map.data[x] {
+                                coll[x][y]={collision=collisionOut[x][y]}
+                                world::add(coll[x][y], (x-1)*24+1, (y-1)*24+1, 22, 22)
+                            }
+                              }
+                              world::add(player, 4*24, 4*24, 24, 24)
+                              player.ttx=4*24
+                              player.tty=4*24
            }
+
            main.switched=true
+
+           self.layeredMap::setDebug(true)
+           self.gui::clean()
        }
        method main.mousereleased(x, y, button, istouch, presses) {
                local x, y = love.mouse.getPosition()
@@ -269,6 +404,14 @@ method love.load() {
         //GameData.Default.TileMaps.DefaultTileMap::loadEdits(newData)
         //GameData.Default.TileMaps.DefaultTileMap::prepare(GameData.Default.Images.DefaultTileset)
         GameData.Default.TileMaps.DefaultTileMap::extend(2, 2, 2, 2)
+        GameData.Default.TileMaps.SecondTileMap::extend(2, 2, 2, 2, fn () {local DefaultTile=Tile::new()
+            DefaultTile['id']='Empty'
+            DefaultTile['prefix']='Default'
+            DefaultTile['type']='Basic_Tile'
+            DefaultTile['tileset']='DefaultTileset'
+            DefaultTile['tilesetPrefix']='Default'
+            return DefaultTile
+        })
         Item.loadSubclasses()
         global Weapon = import("libs.Weapon")
         local FirstWeapon = Weapon::new()
