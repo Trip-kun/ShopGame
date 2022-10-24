@@ -51,6 +51,8 @@ local fn loadLibraries () {
             GUI.register("TextBoxButton", import("libs.gui.elements.TextBoxButton"))
             GUI.register("GUI", import("libs.gui.elements.Wrapper"))
             GUI.register("BasicLayeredTileMap", import("libs.gui.elements.BasicLayeredTileMap"))
+            GUI.register("HoverTextBox", import("libs.gui.elements.HoverTextBox"))
+
 }
 method love.resize(w, h) {
 push.resize(w, h)
@@ -159,6 +161,10 @@ if (mode=="editor") {
            push::finish()
 
        }
+       local up
+       local down
+       local left
+       local right
        method tileset.update(dt) {
            local self = tileset
            local x, y = love.mouse.getPosition()
@@ -191,7 +197,16 @@ if (mode=="editor") {
                                        })
             self.layeredMap=GUI.BasicLayeredTileMap(0, 100, 2, 2, main.newMap)
                                self.gui::add(self.layeredMap)
-
+if (love.system.getOS()=="Android") {
+                         up = GUI.HoverTextBox(800, 500, {0, 0, 1, 1}, 100, 200, 36, "Up")
+                        down = GUI.HoverTextBox(800, 800, {0, 0, 1, 1}, 100, 200, 36, "Down")
+                         left = GUI.HoverTextBox(600, 700, {0, 0, 1, 1}, 200, 100, 36, "Left")
+                         right = GUI.HoverTextBox(900, 700, {0, 0, 1, 1}, 200, 100, 36, "Right")
+                    }
+                    self.gui::add(up)
+                    self.gui::add(down)
+                    self.gui::add(left)
+                    self.gui::add(right)
         }
         playing.switched=true
        }
@@ -215,6 +230,36 @@ if (mode=="editor") {
 
             local x = 0
             local y = 0
+            if (love.system.getOS()=="Android") {
+                                    local touches=love.touch.getTouches()
+                                    local upped=false
+                                    local downed=false
+                                    local lefted=false
+                                    local speed=3
+                                    local righted=false
+                                    for k, v in touches {
+                                    local rx,ry = love.touch.getPosition(v)
+                                    rx,ry=push.toGame(rx,ry)
+                                    if (!upped && up::containsPoint(rx,ry)) {
+                                        upped=true
+                                        y+=-24*speed
+                                    }
+                                if (!downed && down::containsPoint(rx,ry)) {
+
+                                        downed=true
+                                        y+=24*speed
+                                    }
+
+                                if (!lefted && left::containsPoint(rx,ry)) {
+                                        lefted=true
+                                        x+=-24*speed
+                                    }
+                                if (!righted && right::containsPoint(rx,ry)) {
+                                        righted=true
+                                        x+=24*speed
+                                    }
+                                    }
+                                } else {
             if love.keyboard.isDown("w") {
                 y+=-24
             }
@@ -226,6 +271,7 @@ if (mode=="editor") {
             }
             if love.keyboard.isDown("d") {
                 x+=24
+            }
             }
             player.ttx, player.tty = world::move(player, player.ttx+ (x*dt), player.tty+ (y*dt), whatCollider)
             wait.update()

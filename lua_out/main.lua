@@ -390,6 +390,31 @@ _modules = {
 		end
 		return BasicTileMap;
 	end,
+	["libs.gui.elements.HoverTextBox"] = function()
+		local Class = require("libs.class");
+		local TextBox = Class("HoverTextBox");
+		local text = import("libs.gui.mixins.Text");
+		local rectangle = import("libs.gui.mixins.Rectangle");
+		local drawable = import("libs.gui.mixins.Drawable");
+		local hover = import("libs.gui.mixins.Hover");
+		TextBox:include(text);
+		TextBox:include(rectangle);
+		TextBox:include(hover);
+		function TextBox:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
+		end
+		function TextBox:initialize(x, y, color, width, height, fontsize, text, align)
+			self:initRectangle(x, y, color, width, height);
+			self:initText(fontsize, width, height, text, align);
+			self:initHover(x, y, width, height);
+		end
+		function TextBox:update(dt, x, y)
+			self:updateRectangle(dt, x, y);
+		end
+		return TextBox;
+	end,
 	["libs.gui.elements.InvisibleButton"] = function()
 		local Class = require("libs.class");
 		local InvisibleButton = Class("InvisibleButton");
@@ -659,6 +684,26 @@ _modules = {
 			table.insert(self.clickFunctions, func);
 		end
 		return TileMapMixin;
+	end,
+	["libs.gui.mixins.Hover"] = function()
+		local hover = {		};
+		function hover:initHover(x, y, width, height)
+			self.x = x;
+			self.y = y;
+			self.width = width;
+			self.height = height;
+		end
+		function hover:containsPoint(x, y)
+			if not x or not y then
+				return false;
+			end
+			point = {
+				x = x, 
+				y = y
+			};
+			return point.x>=self.x and point.x<=self.x+self.width and point.y>=self.y and point.y<=self.y+self.height;
+		end
+		return hover;
 	end,
 	["libs.gui.mixins.LayeredGuiTileMap"] = function()
 		local LayeredTileMapMixin = {		};
@@ -1509,6 +1554,7 @@ _modules = {
 			GUI.register("TextBoxButton", import("libs.gui.elements.TextBoxButton"));
 			GUI.register("GUI", import("libs.gui.elements.Wrapper"));
 			GUI.register("BasicLayeredTileMap", import("libs.gui.elements.BasicLayeredTileMap"));
+			GUI.register("HoverTextBox", import("libs.gui.elements.HoverTextBox"));
 		end
 		function love.resize(w, h)
 			push.resize(w, h);
@@ -1632,6 +1678,10 @@ _modules = {
 				self.gui:draw();
 				push:finish();
 			end
+			local up;
+			local down;
+			local left;
+			local right;
 			function tileset.update(dt)
 				local self = tileset;
 				local x, y = love.mouse.getPosition();
@@ -1664,6 +1714,36 @@ _modules = {
 					end);
 					self.layeredMap = GUI.BasicLayeredTileMap(0, 100, 2, 2, main.newMap);
 					self.gui:add(self.layeredMap);
+					if (love.system.getOS()=="Android") then
+						up = GUI.HoverTextBox(800, 500, {
+							0, 
+							0, 
+							1, 
+							1
+						}, 100, 200, 36, "Up");
+						down = GUI.HoverTextBox(800, 800, {
+							0, 
+							0, 
+							1, 
+							1
+						}, 100, 200, 36, "Down");
+						left = GUI.HoverTextBox(600, 700, {
+							0, 
+							0, 
+							1, 
+							1
+						}, 200, 100, 36, "Left");
+						right = GUI.HoverTextBox(900, 700, {
+							0, 
+							0, 
+							1, 
+							1
+						}, 200, 100, 36, "Right");
+					end
+					self.gui:add(up);
+					self.gui:add(down);
+					self.gui:add(left);
+					self.gui:add(right);
 				end
 				playing.switched = true;
 			end
@@ -1683,17 +1763,46 @@ _modules = {
 				end
 				local x = 0;
 				local y = 0;
-				if love.keyboard.isDown("w") then
-					y = y + -24;
-				end
-				if love.keyboard.isDown("s") then
-					y = y + 24;
-				end
-				if love.keyboard.isDown("a") then
-					x = x + -24;
-				end
-				if love.keyboard.isDown("d") then
-					x = x + 24;
+				if (love.system.getOS()=="Android") then
+					local touches = love.touch.getTouches();
+					local upped = false;
+					local downed = false;
+					local lefted = false;
+					local speed = 3;
+					local righted = false;
+					for k, v in ipairs(touches) do
+						local rx, ry = love.touch.getPosition(v);
+						rx, ry = push.toGame(rx, ry);
+						if (not upped and up:containsPoint(rx, ry)) then
+							upped = true;
+							y = y + -24*speed;
+						end
+						if (not downed and down:containsPoint(rx, ry)) then
+							downed = true;
+							y = y + 24*speed;
+						end
+						if (not lefted and left:containsPoint(rx, ry)) then
+							lefted = true;
+							x = x + -24*speed;
+						end
+						if (not righted and right:containsPoint(rx, ry)) then
+							righted = true;
+							x = x + 24*speed;
+						end
+					end
+				else
+					if love.keyboard.isDown("w") then
+						y = y + -24;
+					end
+					if love.keyboard.isDown("s") then
+						y = y + 24;
+					end
+					if love.keyboard.isDown("a") then
+						x = x + -24;
+					end
+					if love.keyboard.isDown("d") then
+						x = x + 24;
+					end
 				end
 				player.ttx, player.tty = world:move(player, player.ttx+(x*dt), player.tty+(y*dt), whatCollider);
 				wait.update();
