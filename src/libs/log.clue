@@ -5,6 +5,8 @@
 //msg -> A string with the log message
 local fn Log(level, msg) {
     //io.write("[" .. level .. "] " .. msg .. "\n")
+    if (type(level)!=string) {error("Invalid Argument #1 level: Expected Type String, Got Type: " .. type(level))}
+    if (type(msg)!=string) {error("Invalid Argument #2 msg: Expected Type String, Got Type: ".. type(msg))}
     print("[" .. level .. "] " .. msg)
 }
 
