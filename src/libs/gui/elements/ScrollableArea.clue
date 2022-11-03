@@ -20,19 +20,22 @@ method ScrollableArea::initialize(x, y, width, height, true_width, true_height, 
 method ScrollableArea::drawStart() {
     self.oldCanvas=love.graphics.getCanvas()
     love.graphics.setCanvas(self.canvas)
+    love.graphics.push()
+    love.graphics.translate(-self.offsetX, -self.offsetY)
 }
 method ScrollableArea::drawFinish() {
     love.graphics.setCanvas(self.oldCanvas)
+    love.graphics.pop()
 }
 method ScrollableArea::draw() {
     self::drawStart()
-    love.graphics.translate(-self.offsetX, -self.offsetY)
+    
     for _, v in self.children {
         if v.draw {
             v::draw()
         }
     }
-
+    
     self::drawFinish()
 
     
@@ -54,4 +57,13 @@ method ScrollableArea::updateFinish() {
         cache[i]=v
     }
 
+}
+
+method ScrollableArea::update(dt, x, y) {
+    local x, y = self::convert({x=x, y=y})
+    for _, v in self.children {
+        if v.update {
+            v::update(x, y)
+        }
+    }
 }
