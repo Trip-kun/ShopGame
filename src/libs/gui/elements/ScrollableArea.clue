@@ -26,7 +26,7 @@ method ScrollableArea::drawFinish() {
 }
 method ScrollableArea::draw() {
     self::drawStart()
-
+    love.graphics.translate(-self.offsetX, -self.offsetY)
     for _, v in self.children {
         if v.draw {
             v::draw()
@@ -36,4 +36,22 @@ method ScrollableArea::draw() {
     self::drawFinish()
 
     
+}
+method ScrollableArea::updateStart() {
+    self.backup={}
+    local cache=ClickCache.getCache()
+    for i, v in cache {
+        self.backup[i]=v
+    }
+    for i, v in self.backup {
+        cache[i]= self::convert(v)
+    }
+
+}
+method ScrollableArea::updateFinish() {
+    local cache=ClickCache.getCache()
+    for i, v in self.backup {
+        cache[i]=v
+    }
+
 }
