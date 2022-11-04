@@ -47,7 +47,7 @@ method ScrollableArea::updateStart() {
         self.backup[i]=v
     }
     for i, v in self.backup {
-        cache[i]= self::convert(v)
+        cache[i]= self::fromWorld(v)
     }
 
 }
@@ -58,9 +58,16 @@ method ScrollableArea::updateFinish() {
     }
 
 }
-
+method ScrollableArea::fromWorld(pt) {
+    local x, y = pt.x, pt.y
+    if (x-self.x <0 || x-self.x>self.width || y-self.y<0 || y-self.y>self.height) {
+        return {x=-1, y=-1}
+    }
+    return {x=x-self.x+self.offsetX, y=y-self.y+self.offsetY}
+}
 method ScrollableArea::update(dt, x, y) {
-    local x, y = self::convert({x=x, y=y})
+    local pt = self::fromWorld({x=x, y=y})
+    local x, y = pt.x, pt,y
     for _, v in self.children {
         if v.update {
             v::update(x, y)
