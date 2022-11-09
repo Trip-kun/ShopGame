@@ -58,6 +58,21 @@ method ScrollableArea::updateFinish() {
     }
 
 }
+local fn clamp(x, min, max) {
+    if (x<min) {
+        return min
+    } elseif (x>max) {
+        return max
+    } else {
+        return x
+    }
+}
+method ScrollableArea::scroll(dX, dY) {
+    dX=dX || 0
+    dY=dY || 0
+    self.offsetX=clamp(self.offsetX+dX, 0, self.true_width-self.width )
+    self.offsetY=clamp(self.offsetY+dY, 0, self.true_height-self.height)
+}
 method ScrollableArea::fromWorld(pt) {
     local x, y = pt.x, pt.y
     if (x-self.x <0 || x-self.x>self.width || y-self.y<0 || y-self.y>self.height) {
@@ -70,7 +85,7 @@ method ScrollableArea::update(dt, x, y) {
     local x, y = pt.x, pt,y
     for _, v in self.children {
         if v.update {
-            v::update(x, y)
+            v::update(dt, x, y)
         }
     }
 }
