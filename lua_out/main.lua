@@ -1313,10 +1313,10 @@ _modules = {
 	end,
 	["libs.log"] = function()
 		local function Log(level, msg)
-			if (type(level)~=string) then
+			if (type(level)~="string") then
 				error("Invalid Argument #1 level: Expected Type String, Got Type: "..type(level));
 			end
-			if (type(msg)~=string) then
+			if (type(msg)~="string") then
 				error("Invalid Argument #2 msg: Expected Type String, Got Type: "..type(msg));
 			end
 			print("["..level.."] "..msg);
