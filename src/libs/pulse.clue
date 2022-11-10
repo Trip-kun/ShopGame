@@ -2,7 +2,7 @@ local Class = require("libs.class")
 local pulse = Class("Pulse")
 
 method pulse::first(event, id, ...) {
-    if (self.events[event][id] && !self.cache[event][req]) {
+    if (self.events[event][id] && !self.cache[event][id]) {
         self.events[event][id]()
     } elseif (self.cache[event][id]) {
         

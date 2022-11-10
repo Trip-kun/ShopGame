@@ -89,7 +89,7 @@ method Point2D.fromVector(vector) {
 method Point2D::rotate( rotation, centerPoint) {
     centerPoint = centerPoint  Point2D(0, 0)
     local newX= ((self.x-centerPoint.x)*math.cos(rotation) - (self.y - centerPoint.y)*math.sin(rotation)) + centerPoint.x
-    local newX= ((self.xy-centerPoint.x)*math.sin(rotation) + (self.y - centerPoint.y)*math.cos(rotation)) + centerPoint.y
+    local newY= ((self.x-centerPoint.x)*math.sin(rotation) + (self.y - centerPoint.y)*math.cos(rotation)) + centerPoint.y
     return Point2D(newX, newY)
 }
 

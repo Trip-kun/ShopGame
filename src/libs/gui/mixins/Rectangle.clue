@@ -27,7 +27,7 @@ method rectangle::drawRectangle(x, y, rotation, sx, sy, ox, oy, kx, ky) {
     local y = y || 0
     local sx = sx || 1
     local sy = sy || 1
-    local r = r || 0
+    local rotation = rotation || 0
     local oldCanvas = love.graphics.getCanvas()
         love.graphics.setCanvas(self.rectangleCanvas)
         local a, b, c, d = love.graphics.getScissor()

@@ -109,7 +109,7 @@ method Tile::toLua(TileMapName, TileMapPrefix, x, y) {
 
     return out
 }
-method Tile.handle(object, data) {
+method Tile.handle(self, data) {
     self.type=data.type
     self.prefix=data.prefix
     self.id=data.id

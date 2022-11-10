@@ -144,7 +144,7 @@ _modules = {
 			centerPoint = centerPoint;
 			Point2D(0, 0);
 			local newX = ((self.x-centerPoint.x)*math.cos(rotation)-(self.y-centerPoint.y)*math.sin(rotation))+centerPoint.x;
-			local newX = ((self.xy-centerPoint.x)*math.sin(rotation)+(self.y-centerPoint.y)*math.cos(rotation))+centerPoint.y;
+			local newY = ((self.x-centerPoint.x)*math.sin(rotation)+(self.y-centerPoint.y)*math.cos(rotation))+centerPoint.y;
 			return Point2D(newX, newY);
 		end
 		function Point2D:translate(vector)
@@ -259,7 +259,7 @@ _modules = {
 			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tilesetPrefix']='"..self.tilesetPrefix.."'";
 			return out;
 		end
-		function Tile.handle(object, data)
+		function Tile.handle(self, data)
 			self.type = data.type;
 			self.prefix = data.prefix;
 			self.id = data.id;
@@ -469,7 +469,7 @@ _modules = {
 		local Class = require("libs.class");
 		local pulse = Class("Pulse");
 		function pulse:first(event, id, ...)
-			if (self.events[(event)][(id)] and not self.cache[(event)][(req)]) then
+			if (self.events[(event)][(id)] and not self.cache[(event)][(id)]) then
 				self.events[(event)][(id)]();
 			elseif (self.cache[(event)][(id)]) then
 				
@@ -1168,7 +1168,7 @@ _modules = {
 			local y = y or 0;
 			local sx = sx or 1;
 			local sy = sy or 1;
-			local r = r or 0;
+			local rotation = rotation or 0;
 			local oldCanvas = love.graphics.getCanvas();
 			love.graphics.setCanvas(self.rectangleCanvas);
 			local a, b, c, d = love.graphics.getScissor();
