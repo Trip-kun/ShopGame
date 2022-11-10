@@ -20,117 +20,257 @@ do
 	end
 end
 _modules = {
-	["assets.DefaultTileset"] = function()
-		local function generateQuad24X(x, y, tileset)
-			return love.graphics.newQuad(1+((x-1)*25), 1+((y-1)*25), 24, 24, tileset);
-		end
-		local TileMap = import("libs.TileMap");
-		local Tile = import("libs.tile");
-		return function(GameData)
-			local canvas = love.graphics.newCanvas(24, 24);
-			GameData.Default.Images.Empty = canvas;
-			love.graphics.setCanvas(canvas);
-			love.graphics.clear(0, 0, 0, 0);
-			love.graphics.setCanvas();
-			local emptyQuad = love.graphics.newQuad(0, 0, 24, 24, canvas);
-			local orderedTable = {			};
-			GameData.Default.Tiles.DefaultTileset = setmetatable({			}, {
-				__newindex = function(tbl, key, value)
-					table.insert(orderedTable, {
-						key, 
-						value
-					});
-					local coll = false;
-					rawset(tbl, key, {
-						quad = value, 
-						collision = coll
-					});
-				end
-			});
-			GameData.Default.Tiles.DefaultTileset.EmptyCollider = emptyQuad;
-			GameData.Default.Tiles.DefaultTileset.Empty = emptyQuad;
-			GameData.Default.Tiles.DefaultTileset.Dirt = generateQuad24X(8, 3, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtULGrassDR = generateQuad24X(2, 2, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtUGrassD = generateQuad24X(3, 2, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtURGrassDL = generateQuad24X(4, 2, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtLGrassR = generateQuad24X(2, 3, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtRGrassL = generateQuad24X(4, 3, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtDLGrassUR = generateQuad24X(2, 4, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtDGrassU = generateQuad24X(3, 4, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtDRGrassUL = generateQuad24X(4, 4, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtULDarkDR = generateQuad24X(2, 7, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtUDarkD = generateQuad24X(3, 7, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtURDarkDL = generateQuad24X(4, 7, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtLDarkR = generateQuad24X(2, 8, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtRDarkL = generateQuad24X(4, 8, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtDLDarkUR = generateQuad24X(2, 9, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtDDarkU = generateQuad24X(3, 9, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DirtDRDarkUL = generateQuad24X(4, 9, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.Dark = generateQuad24X(3, 8, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkULGrassDR = generateQuad24X(2, 7+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkUGrassD = generateQuad24X(3, 7+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkURGrassDL = generateQuad24X(4, 7+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkLGrassR = generateQuad24X(2, 8+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkRGrassL = generateQuad24X(4, 8+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkDLGrassUR = generateQuad24X(2, 9+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkDGrassU = generateQuad24X(3, 9+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkDRGrassUL = generateQuad24X(4, 9+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.Grass = generateQuad24X(3, 8+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassULDirtDR = generateQuad24X(2+5, 2, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassUDirtD = generateQuad24X(3+5, 2, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassURDirtDL = generateQuad24X(4+5, 2, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassLDirtR = generateQuad24X(2+5, 3, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassRDirtL = generateQuad24X(4+5, 3, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassDLDirtUR = generateQuad24X(2+5, 4, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassDDirtU = generateQuad24X(3+5, 4, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassDRDirtUL = generateQuad24X(4+5, 4, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkULDirtDR = generateQuad24X(12-5, 7, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkUDirtD = generateQuad24X(13-5, 7, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkURDirtDL = generateQuad24X(14-5, 7, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkLDirtR = generateQuad24X(12-5, 8, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkRDirtL = generateQuad24X(14-5, 8, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkDLDirtUR = generateQuad24X(12-5, 9, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkDDirtU = generateQuad24X(13-5, 9, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.DarkDRDirtUL = generateQuad24X(14-5, 9, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassULDarkDR = generateQuad24X(2+5, 7+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassUDarkD = generateQuad24X(3+5, 7+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassURDarkDL = generateQuad24X(4+5, 7+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassLDarkR = generateQuad24X(2+5, 8+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassRDarkL = generateQuad24X(4+5, 8+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassDLDarkUR = generateQuad24X(2+5, 9+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassDDarkU = generateQuad24X(3+5, 9+5, GameData.Default.Images.DefaultTileset);
-			GameData.Default.Tiles.DefaultTileset.GrassDRDarkUL = generateQuad24X(4+5, 9+5, GameData.Default.Images.DefaultTileset);
-			rawset(GameData.Default.Tiles.DefaultTileset, "EmptyCollider", {
-				quad = emptyQuad, 
-				collision = true
-			});
-			rawset(GameData.Default.Tiles.DefaultTileset, "Empty", {
-				quad = emptyQuad, 
-				collision = false
-			});
-			local out = {			};
-			for k, v in ipairs(orderedTable) do
-				local t = Tile();
-				t.sx = 1;
-				t.sy = 1;
-				t.id = v[(1)];
-				t.prefix = "Default";
-				if (v[(2)]==emptyQuad) then
-					t.tileset = "DefaultTileset";
-					t.type = "Utility_Tile";
-				else
-					t.type = "Basic_Tile";
-					t.tileset = "DefaultTileset";
-				end
-				t.tilesetPrefix = "Default";
-				table.insert(out, t);
-			end
-			GameData.Default.TileMaps.DefaultTileset = TileMap.fromTable(out);
-			GameData.Default.TileMaps.DefaultTileset.name = "DefaultTileset";
-		end;
-	end,
 	["conf"] = function()
 		return "not_editor";
+	end,
+	["libs.util.wait"] = function()
+		local waitTable = {		};
+		log = import("libs.log");
+		local wait = setmetatable({		}, {
+			__call = function(self, seconds, func, args)
+				table.insert(waitTable, {
+					love.timer.getTime()+seconds, 
+					func, 
+					args
+				});
+			end
+		});
+		function wait.update()
+			for k, v in pairs(waitTable) do
+				if love.timer.getTime()>=v[(1)] then
+					if v[(2)] then
+						v[(2)](v[(3)]);
+					end
+					table.remove(waitTable, k);
+				end
+			end
+		end
+		log.custom("WAIT", "Loaded");
+		return wait;
+	end,
+	["libs.util.gamestate"] = function()
+		local gamestate = {		};
+		log = import("libs.log");
+		local currstate = {
+			name = "initialstate"
+		};
+		function gamestate.switch(state)
+			local statename = state.name or "NONAME";
+			local currstatename = currstate.name or "NONAME";
+			log.custom("GAMESTATE", "Switching To State: "..statename.." from state: "..currstatename);
+			if currstate.switchaway then
+				currstate.switchaway();
+			end
+			if state.switchto then
+				state.switchto();
+			end
+			for k, v in pairs(state) do
+				if k~='content' and k~='name' and k~='switchaway' and k~='switchto' and k~='quit' then
+					love[(k)] = v;
+				end
+			end
+			currstate = state;
+		end
+		function gamestate.getStateName()
+			return currstate.name;
+		end
+		log.custom("GAMESTATE", "Loaded");
+		return gamestate;
+	end,
+	["libs.util.util"] = function()
+		log = import("libs.log");
+		log.custom("UTIL", "Loaded");
+		function Test(a, b)
+			return a+b;
+		end
+	end,
+	["libs.util.Math"] = function()
+		local Class = require("libs.class");
+		local Point2D = Class("Point2D");
+		local Vector2D = Class("Vector2D");
+		Point2D.__eq = function(point1, point2)
+			return point1.x==point2.x and point1.y==point2.y;
+		end;
+		Point2D.__tostring = function(point)
+			return "2D Point: {"..point.x..", "..point.y.."}";
+		end;
+		function Point2D:initialize(x, y)
+			self.x = x;
+			self.y = y;
+		end
+		Vector2D.__eq = function(vector1, vector2)
+			return vector1.x==vector2.x and vector1.y==vector2.y;
+		end;
+		Vector2D.__tostring = function(vector)
+			return "2D Vector: {X "..vector.x..", Y "..vector.y..", Angle (Radians) "..vector:getAngle()..", MAGNITUDE "..vector:getMagnitude().."}";
+		end;
+		function Vector2D:getMagnitude()
+			return (((self.x^2)+(self.y^2))^0.5);
+		end
+		function Vector2D:getAngle()
+			return math.atan2(self.y, self.x);
+		end
+		function Vector2D:initialize(x, y, mode)
+			if (mode=="Polar") then
+				self.x = math.cos(x)*y;
+				self.y = math.sin(x)*y;
+			else
+				self.x = x;
+				self.y = y;
+			end
+		end
+		function Vector2D:apply(vector)
+			return Vector2D(self.x+vector.x, self.y+vector.y);
+		end
+		function Vector2D.fromPoint(point)
+			return Vector2D(point.x, point.y);
+		end
+		function Vector2D:multiply(vector)
+			return Vector2D(self.x*vector.x, self.y*vector.y);
+		end
+		function Vector2D:toPoint()
+			return Point2D.fromVector(self);
+		end
+		function Point2D:distanceToPoint(point)
+			return ((self.x-point.x)^2+(self.y-point.y)^2)^0.5;
+		end
+		function Point2D:toVector()
+			return Vector2D.fromPoint(self);
+		end
+		function Point2D.fromVector(vector)
+			return Point2D(vector.x, vector.y);
+		end
+		function Point2D:rotate(rotation, centerPoint)
+			centerPoint = centerPoint;
+			Point2D(0, 0);
+			local newX = ((self.x-centerPoint.x)*math.cos(rotation)-(self.y-centerPoint.y)*math.sin(rotation))+centerPoint.x;
+			local newX = ((self.xy-centerPoint.x)*math.sin(rotation)+(self.y-centerPoint.y)*math.cos(rotation))+centerPoint.y;
+			return Point2D(newX, newY);
+		end
+		function Point2D:translate(vector)
+			return Point2D(self.x+vector.x, self.y+vector.y);
+		end
+		local negativeVector = Vector2D(-1, -1);
+		function Point2D:scale(scaleVector, centerVector)
+			return self:toVector():apply(centerVector:multiply(negativeVector)):multiply(scaleVector):apply(centerVector):toPoint();
+		end
+		local out = {		};
+		out.Point2D = Point2D;
+		out.Vector2D = Vector2D;
+		return out;
+	end,
+	["libs.util.settings"] = function()
+		local settings = {		};
+		local stgs;
+		return settings;
+	end,
+	["libs.tile"] = function()
+		Class = require("libs.class");
+		log = import("libs.log");
+		json = require("libs.json");
+		local Tile = Class("Tile");
+		local GameData = nil;
+		Tile.sx = 1;
+		Tile.sy = 1;
+		Tile.type = "Basic_Tile";
+		Tile.prefix = "Default";
+		Tile.id = "Default";
+		Tile.tileset = "DefaultTileset";
+		Tile.tilesetPrefix = "Default";
+		function Tile:initialize()
+			self.sx = 1;
+			self.sy = 1;
+		end
+		function Tile.loadGameData()
+			GameData = import("libs.GameData");
+		end
+		function Tile:getQuad()
+			return GameData[(self.tilesetPrefix)].Tiles[(self.tileset)][(self.id)].quad;
+		end
+		function Tile:getCollision()
+			return GameData[(self.tilesetPrefix)].Tiles[(self.tileset)][(self.id)].collision;
+		end
+		function Tile:getTileset()
+			return GameData[(self.prefix)].Images[(self.tileset)];
+		end
+		function Tile:isEmpty()
+			return self.id=="Empty" or self.id=="EmptyCollider";
+		end
+		function Tile:draw(x, y, r, sx, sy, ox, oy, kx, ky, debug)
+			if (not self:isEmpty() and not debug) then
+				love.graphics.draw(self:getTileset(), self:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
+			elseif (self:isEmpty() and debug) then
+				local oldColor = {
+					love.graphics.getColor()
+				};
+				if (self.id=="EmptyCollider") then
+					love.graphics.setColor(1, 0, 0, 0.5);
+				else
+					love.graphics.setColor(0, 1, 0, 0.5);
+				end
+				love.graphics.rectangle("fill", -12*sx, -12*sx, 24*sx, 24*sx);
+				love.graphics.setColor(0, 0, 0, 0.5);
+				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
+				love.graphics.setColor(oldColor);
+			else
+				love.graphics.draw(self:getTileset(), self:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
+				local oldColor = {
+					love.graphics.getColor()
+				};
+				love.graphics.setColor(0, 0, 0, 0.5);
+				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
+				love.graphics.setColor(oldColor);
+			end
+		end
+		function Tile:cloneTile()
+			local tile = Tile();
+			tile.id = self.id;
+			tile.prefix = self.prefix;
+			tile.type = self.type;
+			tile.tileset = self.tileset;
+			tile.tilesetPrefix = self.tilesetPrefix;
+			return tile;
+		end
+		function Tile:toClue(TileMapName, TileMapPrefix, x, y)
+			local out = "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]=Tile::new()";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['id']='"..self.id.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['prefix']='"..self.prefix.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['type']='"..self.type.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tileset']='"..self.tileset.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tilesetPrefix']='"..self.tilesetPrefix.."'";
+			return out;
+		end
+		function Tile:toLua(TileMapName, TileMapPrefix, x, y)
+			local out = "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]=Tile:new()";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['id']='"..self.id.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['prefix']='"..self.prefix.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['type']='"..self.type.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tileset']='"..self.tileset.."'";
+			out = out .. "\n";
+			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tilesetPrefix']='"..self.tilesetPrefix.."'";
+			return out;
+		end
+		function Tile.handle(object, data)
+			self.type = data.type;
+			self.prefix = data.prefix;
+			self.id = data.id;
+		end
+		function Tile.fromJSON(data)
+			if type(data)~="string" then
+				error("Not a string.");
+			end
+			local dataInTable = json.decode(data);
+		end
+		return Tile;
 	end,
 	["libs.GameData"] = function()
 		local TileMap = import("libs.TileMap");
@@ -325,49 +465,147 @@ _modules = {
 		end
 		return GameData;
 	end,
-	["libs.gui.elements.BasicButton"] = function()
+	["libs.pulse"] = function()
 		local Class = require("libs.class");
-		local BasicButton = Class("BasicButton");
-		local button = import("libs.gui.mixins.Button");
-		local drawable = import("libs.gui.mixins.Drawable");
-		BasicButton:include(button);
-		BasicButton:include(drawable);
-		function BasicButton:initialize(x, y, active, width, height, canvas)
-			self:initButton(x, y, active, width, height);
-			self:initDrawable(x, y, canvas, width, height);
+		local pulse = Class("Pulse");
+		function pulse:first(event, id, ...)
+			if (self.events[(event)][(id)] and not self.cache[(event)][(req)]) then
+				self.events[(event)][(id)]();
+			elseif (self.cache[(event)][(id)]) then
+				
+			else
+				error("No Function Found with ID: "..id);
+			end
 		end
-		return BasicButton;
+		function pulse:initialize(events)
+			if (type(events)~="table" and type(events)~="nil") then
+				error("Invalid Arugment #1 events: Expected Type Nil Or Function, Got Type: "..type(events));
+			end
+			self.events = {			};
+			self.cache = {			};
+			for k, v in pairs(events) do
+				self.events[(v)] = {				};
+				self.cache[(v)] = {				};
+			end
+		end
+		function pulse:newEvent(event)
+			if (type(event)=="nil") then
+				error("Invalid Argument #1 event: Argument Cannot Be Nil");
+			end
+			self.events[(event)] = {			};
+		end
+		function pulse:removeEvent(event)
+			if (type(event)=="nil") then
+				error("Invalid Argument #1 event: Argument Cannot Be Nil");
+			end
+			self.events[(event)] = nil;
+		end
+		function pulse:onEvent(event, id, func)
+			if (type(event)=="nil") then
+				error("Invalid Argument #1 event: Argument Cannot Be Nil");
+			end
+			if (type(id)=="nil") then
+				error("Invalid Argument #2 id: Argument Cannot Be Nil");
+			end
+			if (type(func)~="function") then
+				error("Invalid Argument #3 func: Expected Type Function, Got Type: "..type(func));
+			end
+			self.events[(event)][(id)] = func;
+		end
+		function pulse:removeOnEvent(event, id)
+			if (type(event)=="nil") then
+				error("Invalid Argument #1 event: Argument Cannot Be Nil");
+			end
+			if (type(id)=="nil") then
+				error("Invalid Argument #2 id: Argument Cannot Be Nil");
+			end
+			self.events[(event)][(id)] = nil;
+		end
+		function pulse:emit(event, ...)
+			if (type(event)=="nil") then
+				error("Invalid Argument #1 event: Argument Cannot Be Nil");
+			end
+			self.cache = {			};
+			for k, v in pairs(self.events) do
+				self.cache[(k)] = {				};
+			end
+			for k, v in pairs(self.events[(event)]) do
+				if (not self.cache[(event)][(k)]) then
+					v(...);
+					self.cache[(event)][(k)] = true;
+				end
+			end
+		end
 	end,
-	["libs.gui.elements.BasicDrawable"] = function()
-		local Class = require("libs.class");
-		local BasicDrawable = Class("BasicDrawable");
-		local drawable = import("libs.gui.mixins.Drawable");
-		BasicDrawable:include(drawable);
-		function BasicDrawable:initialize(x, y, canvas, width, height)
-			self:initDrawable(x, y, canvas, width, height);
+	["libs.Item"] = function()
+		Class = require("libs.class");
+		log = import("libs.log");
+		dump = require("libs.dump");
+		local json = require("libs.json");
+		local Item = Class("Item");
+		local Weapon = nil;
+		local GameData = import("libs.GameData");
+		Item.id = "";
+		Item.type = "Item";
+		Item.prefix = "Default";
+		Item.name = "New Item";
+		Item.quad = nil;
+		function Item.loadSubclasses()
+			log.custom("ITEM", "Loading Subclasses:");
+			Weapon = import("libs.Weapon");
+			log.custom("ITEM", "All Subclasses Loaded. ");
 		end
-		return BasicDrawable;
+		function Item.getName(item)
+			return GameData[(item.prefix)].Items[(item.id)].name_en;
+		end
+		function Item.handle(item, data)
+			item.prefix = data.prefix;
+			item.id = data.id;
+			item.type = GameData[(item.prefix)].Items[(item.id)].type;
+			item.name = item:getName();
+			return item;
+		end
+		function Item.fromJSON(data)
+			if type(data)~="string" then
+				error("Not a string.");
+			end
+			local dataInTable = json.decode(data);
+			local type = GameData[(dataInTable.prefix)].Items[(dataInTable.id)].type;
+			if (type=="Item") then
+				local newItem = Item:new();
+				return Item.handle(newItem, dataInTable);
+			elseif (type=="Weapon") then
+				local newWeapon = Weapon:new();
+				Item.handle(newWeapon, dataInTable);
+				return Weapon.handle(newWeapon, dataInTable.WeaponData);
+			end
+		end
+		function Item:toJSON()
+			local data = {			};
+			data.id = self.id;
+			data.prefix = self.prefix;
+			if self.type=="Weapon" then
+				data.WeaponData = {				};
+				data.WeaponData.sharpened = self.sharpened;
+			end
+			return json.encode(data);
+		end
+		log.custom("ITEM", "Initial Log Complete");
+		return Item;
 	end,
-	["libs.gui.elements.BasicLayeredTileMap"] = function()
-		local Class = require("libs.class");
-		local BasicLayeredTileMap = Class("BasicLayeredTileMap");
-		local LayeredTileMapMixin = import("libs.gui.mixins.LayeredGuiTileMap");
-		BasicLayeredTileMap:include(LayeredTileMapMixin);
-		function BasicLayeredTileMap:initialize(x, y, sx, sy, map)
-			self.x = x;
-			self.y = y;
-			self._sx = sx;
-			self._sy = sy;
-			self:initLayeredTileMap(map);
+	["libs.Weapon"] = function()
+		Class = require("libs.class");
+		local Item = import("libs.Item");
+		local Weapon = Item:subclass("Weapon");
+		local GameData = import("libs.GameData");
+		Weapon.damage = 0;
+		Weapon.sharpened = false;
+		function Weapon.handle(weapon, data)
+			weapon.damage = GameData[(weapon.prefix)].Items[(weapon.id)].damage;
+			weapon.sharpened = data.sharpened;
+			return weapon;
 		end
-		function BasicLayeredTileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
-			rx = rx or 0;
-			ry = ry or 0;
-			sx = sx or 1;
-			sy = sy or 1;
-			LayeredTileMapMixin.draw(self, rx+self.x, ry+self.y, r, sx*self._sx, sy*self._sy, ox, oy, kx, ky);
-		end
-		return BasicLayeredTileMap;
+		return Weapon;
 	end,
 	["libs.gui.elements.BasicTileMap"] = function()
 		local Class = require("libs.class");
@@ -389,89 +627,6 @@ _modules = {
 			TileMapMixin.draw(self, rx+self.x, ry+self.y, r, sx*self._sx, sy*self._sy, ox, oy, kx, ky);
 		end
 		return BasicTileMap;
-	end,
-	["libs.gui.elements.HoverTextBox"] = function()
-		local Class = require("libs.class");
-		local TextBox = Class("HoverTextBox");
-		local text = import("libs.gui.mixins.Text");
-		local rectangle = import("libs.gui.mixins.Rectangle");
-		local drawable = import("libs.gui.mixins.Drawable");
-		local hover = import("libs.gui.mixins.Hover");
-		TextBox:include(text);
-		TextBox:include(rectangle);
-		TextBox:include(hover);
-		function TextBox:draw(x, y, r, sx, sy, ox, oy, kx, ky)
-			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
-		end
-		function TextBox:initialize(x, y, color, width, height, fontsize, text, align)
-			self:initRectangle(x, y, color, width, height);
-			self:initText(fontsize, width, height, text, align);
-			self:initHover(x, y, width, height);
-		end
-		function TextBox:update(dt, x, y)
-			self:updateRectangle(dt, x, y);
-		end
-		return TextBox;
-	end,
-	["libs.gui.elements.InvisibleButton"] = function()
-		local Class = require("libs.class");
-		local InvisibleButton = Class("InvisibleButton");
-		local button = import("libs.gui.mixins.Button");
-		InvisibleButton:include(button);
-		function InvisibleButton:initialize(x, y, active, width, height)
-			self:initButton(x, y, active, width, height);
-		end
-		return InvisibleButton;
-	end,
-	["libs.gui.elements.TextBox"] = function()
-		local Class = require("libs.class");
-		local TextBox = Class("TextBox");
-		local text = import("libs.gui.mixins.Text");
-		local rectangle = import("libs.gui.mixins.Rectangle");
-		local drawable = import("libs.gui.mixins.Drawable");
-		TextBox:include(text);
-		TextBox:include(rectangle);
-		function TextBox:draw(x, y, r, sx, sy, ox, oy, kx, ky)
-			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
-		end
-		function TextBox:initialize(x, y, color, width, height, fontsize, text, align)
-			self:initRectangle(x, y, color, width, height);
-			self:initText(fontsize, width, height, text, align);
-		end
-		function TextBox:update(dt, x, y)
-			self:updateRectangle(dt, x, y);
-		end
-		return TextBox;
-	end,
-	["libs.gui.elements.TextBoxButton"] = function()
-		local Class = require("libs.class");
-		local TextBoxButton = Class("TextBoxButton");
-		local button = import("libs.gui.mixins.Button");
-		local text = import("libs.gui.mixins.Text");
-		local rectangle = import("libs.gui.mixins.Rectangle");
-		local drawable = import("libs.gui.mixins.Drawable");
-		TextBoxButton:include(button);
-		TextBoxButton:include(text);
-		TextBoxButton:include(rectangle);
-		function TextBoxButton:draw(x, y, r, sx, sy, ox, oy, kx, ky)
-			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
-			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
-		end
-		function TextBoxButton:initialize(x, y, color, width, height, fontsize, text, active, align)
-			self:initButton(x, y, active, width, height);
-			self:initRectangle(x, y, color, width, height);
-			self:initText(fontsize, width, height, text, align);
-		end
-		function TextBoxButton:update(dt, x, y)
-			button.update(self, dt);
-			self:updateRectangle(dt, x, y);
-		end
-		return TextBoxButton;
 	end,
 	["libs.gui.elements.Wrapper"] = function()
 		local Class = require("libs.class");
@@ -522,12 +677,245 @@ _modules = {
 		end;
 		return GUI;
 	end,
-	["libs.gui.gui"] = function()
-		local out = {		};
-		out.register = function(name, class)
-			out[(name)] = class;
-		end;
-		return out;
+	["libs.gui.elements.HoverTextBox"] = function()
+		local Class = require("libs.class");
+		local TextBox = Class("HoverTextBox");
+		local text = import("libs.gui.mixins.Text");
+		local rectangle = import("libs.gui.mixins.Rectangle");
+		local drawable = import("libs.gui.mixins.Drawable");
+		local hover = import("libs.gui.mixins.Hover");
+		TextBox:include(text);
+		TextBox:include(rectangle);
+		TextBox:include(hover);
+		function TextBox:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
+		end
+		function TextBox:initialize(x, y, color, width, height, fontsize, text, align)
+			self:initRectangle(x, y, color, width, height);
+			self:initText(fontsize, width, height, text, align);
+			self:initHover(x, y, width, height);
+		end
+		function TextBox:update(dt, x, y)
+			self:updateRectangle(dt, x, y);
+		end
+		return TextBox;
+	end,
+	["libs.gui.elements.BasicButton"] = function()
+		local Class = require("libs.class");
+		local BasicButton = Class("BasicButton");
+		local button = import("libs.gui.mixins.Button");
+		local drawable = import("libs.gui.mixins.Drawable");
+		BasicButton:include(button);
+		BasicButton:include(drawable);
+		function BasicButton:initialize(x, y, active, width, height, canvas)
+			self:initButton(x, y, active, width, height);
+			self:initDrawable(x, y, canvas, width, height);
+		end
+		return BasicButton;
+	end,
+	["libs.gui.elements.ScrollableArea"] = function()
+		local Class = require("libs.class");
+		local ClickCache = import("libs.gui.subsystems.ClickCache");
+		local ScrollableArea = Class("ScrollableArea");
+		local push = require("libs.push");
+		function ScrollableArea:initialize(x, y, width, height, true_width, true_height, start_offset_x, start_offset_y)
+			firstRun = false;
+			self.x, self.y = x, y;
+			self.width = width;
+			self.height = height;
+			self.true_width = true_width;
+			self.true_height = true_height;
+			self.canvas = love.graphics.newCanvas(true_width, true_height);
+			self.offsetX = start_offset_x or 0;
+			self.offsetY = start_offset_y or 0;
+			self.children = {			};
+		end
+		function ScrollableArea:drawStart()
+			self.oldCanvas = love.graphics.getCanvas();
+			love.graphics.setCanvas(self.canvas);
+			love.graphics.push();
+			love.graphics.translate(-self.offsetX, -self.offsetY);
+		end
+		function ScrollableArea:drawFinish()
+			love.graphics.setCanvas(self.oldCanvas);
+			love.graphics.pop();
+		end
+		function ScrollableArea:draw()
+			self:drawStart();
+			for _, v in ipairs(self.children) do
+				if v.draw then
+					v:draw();
+				end
+			end
+			self:drawFinish();
+		end
+		function ScrollableArea:updateStart()
+			self.backup = {			};
+			local cache = ClickCache.getCache();
+			for i, v in ipairs(cache) do
+				self.backup[(i)] = v;
+			end
+			for i, v in ipairs(self.backup) do
+				cache[(i)] = self:fromWorld(v);
+			end
+		end
+		function ScrollableArea:updateFinish()
+			local cache = ClickCache.getCache();
+			for i, v in ipairs(self.backup) do
+				cache[(i)] = v;
+			end
+		end
+		local function clamp(x, min, max)
+			if (x<min) then
+				return min;
+			elseif (x>max) then
+				return max;
+			else
+				return x;
+			end
+		end
+		function ScrollableArea:scroll(dX, dY)
+			dX = dX or 0;
+			dY = dY or 0;
+			self.offsetX = clamp(self.offsetX+dX, 0, self.true_width-self.width);
+			self.offsetY = clamp(self.offsetY+dY, 0, self.true_height-self.height);
+		end
+		function ScrollableArea:fromWorld(pt)
+			local x, y = pt.x, pt.y;
+			if (x-self.x<0 or x-self.x>self.width or y-self.y<0 or y-self.y>self.height) then
+				return {
+					x = -1, 
+					y = -1
+				};
+			end
+			return {
+				x = x-self.x+self.offsetX, 
+				y = y-self.y+self.offsetY
+			};
+		end
+		function ScrollableArea:update(dt, x, y)
+			local pt = self:fromWorld({
+				x = x, 
+				y = y
+			});
+			local x, y = pt.x, pt, y;
+			for _, v in ipairs(self.children) do
+				if v.update then
+					v:update(dt, x, y);
+				end
+			end
+		end
+	end,
+	["libs.gui.elements.TextBox"] = function()
+		local Class = require("libs.class");
+		local TextBox = Class("TextBox");
+		local text = import("libs.gui.mixins.Text");
+		local rectangle = import("libs.gui.mixins.Rectangle");
+		local drawable = import("libs.gui.mixins.Drawable");
+		TextBox:include(text);
+		TextBox:include(rectangle);
+		function TextBox:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
+		end
+		function TextBox:initialize(x, y, color, width, height, fontsize, text, align)
+			self:initRectangle(x, y, color, width, height);
+			self:initText(fontsize, width, height, text, align);
+		end
+		function TextBox:update(dt, x, y)
+			self:updateRectangle(dt, x, y);
+		end
+		return TextBox;
+	end,
+	["libs.gui.elements.BasicDrawable"] = function()
+		local Class = require("libs.class");
+		local BasicDrawable = Class("BasicDrawable");
+		local drawable = import("libs.gui.mixins.Drawable");
+		BasicDrawable:include(drawable);
+		function BasicDrawable:initialize(x, y, canvas, width, height)
+			self:initDrawable(x, y, canvas, width, height);
+		end
+		return BasicDrawable;
+	end,
+	["libs.gui.elements.InvisibleButton"] = function()
+		local Class = require("libs.class");
+		local InvisibleButton = Class("InvisibleButton");
+		local button = import("libs.gui.mixins.Button");
+		InvisibleButton:include(button);
+		function InvisibleButton:initialize(x, y, active, width, height)
+			self:initButton(x, y, active, width, height);
+		end
+		return InvisibleButton;
+	end,
+	["libs.gui.elements.TextBoxButton"] = function()
+		local Class = require("libs.class");
+		local TextBoxButton = Class("TextBoxButton");
+		local button = import("libs.gui.mixins.Button");
+		local text = import("libs.gui.mixins.Text");
+		local rectangle = import("libs.gui.mixins.Rectangle");
+		local drawable = import("libs.gui.mixins.Drawable");
+		TextBoxButton:include(button);
+		TextBoxButton:include(text);
+		TextBoxButton:include(rectangle);
+		function TextBoxButton:draw(x, y, r, sx, sy, ox, oy, kx, ky)
+			drawable.draw(self, x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawRectangle(x, y, r, sx, sy, ox, oy, kx, ky);
+			self:drawText(x, y, r, sx, sy, ox, oy, kx, ky);
+		end
+		function TextBoxButton:initialize(x, y, color, width, height, fontsize, text, active, align)
+			self:initButton(x, y, active, width, height);
+			self:initRectangle(x, y, color, width, height);
+			self:initText(fontsize, width, height, text, align);
+		end
+		function TextBoxButton:update(dt, x, y)
+			button.update(self, dt);
+			self:updateRectangle(dt, x, y);
+		end
+		return TextBoxButton;
+	end,
+	["libs.gui.elements.BasicLayeredTileMap"] = function()
+		local Class = require("libs.class");
+		local BasicLayeredTileMap = Class("BasicLayeredTileMap");
+		local LayeredTileMapMixin = import("libs.gui.mixins.LayeredGuiTileMap");
+		BasicLayeredTileMap:include(LayeredTileMapMixin);
+		function BasicLayeredTileMap:initialize(x, y, sx, sy, map)
+			self.x = x;
+			self.y = y;
+			self._sx = sx;
+			self._sy = sy;
+			self:initLayeredTileMap(map);
+		end
+		function BasicLayeredTileMap:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
+			rx = rx or 0;
+			ry = ry or 0;
+			sx = sx or 1;
+			sy = sy or 1;
+			LayeredTileMapMixin.draw(self, rx+self.x, ry+self.y, r, sx*self._sx, sy*self._sy, ox, oy, kx, ky);
+		end
+		return BasicLayeredTileMap;
+	end,
+	["libs.gui.mixins.Hover"] = function()
+		local hover = {		};
+		function hover:initHover(x, y, width, height)
+			self.x = x;
+			self.y = y;
+			self.width = width;
+			self.height = height;
+		end
+		function hover:containsPoint(x, y)
+			if not x or not y then
+				return false;
+			end
+			point = {
+				x = x, 
+				y = y
+			};
+			return point.x>=self.x and point.x<=self.x+self.width and point.y>=self.y and point.y<=self.y+self.height;
+		end
+		return hover;
 	end,
 	["libs.gui.mixins.Active"] = function()
 		local active = {		};
@@ -571,6 +959,82 @@ _modules = {
 			table.insert(self.clickFunctions, func);
 		end
 		return button;
+	end,
+	["libs.gui.mixins.Text"] = function()
+		local text = {		};
+		local fontCache = import("libs.gui.subsystems.FontCache");
+		function text:initText(fontsize, width, height, text, align)
+			self.fontsize = fontsize;
+			self.align = align or "left";
+			self.width = width;
+			self.height = height;
+			self.font = fontCache:getFont(fontsize);
+			self.text = love.graphics.newText(self.font);
+			self.textCanvas = love.graphics.newCanvas(self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
+			self.text:setf(text, width-(20*2), self.align);
+		end
+		function text:drawText(x, y, r, sx, sy, ox, oy, kx, ky)
+			x = x or 0;
+			y = y or 0;
+			local oldCanvas = love.graphics.getCanvas();
+			love.graphics.setCanvas(self.textCanvas);
+			love.graphics.clear();
+			local a, b, c, d = love.graphics.getScissor();
+			love.graphics.setScissor(0, 0, self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
+			love.graphics.draw(self.text);
+			love.graphics.setScissor(a, b, c, d);
+			love.graphics.setCanvas(oldCanvas);
+			love.graphics.push();
+			love.graphics.translate(self.x+x+20+(self.width-(20*2))/2, self.y+y+20+(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2);
+			love.graphics.scale(self.sx, self.sy);
+			love.graphics.draw(self.textCanvas, -(self.width-(20*2))/2, -(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2, r, sx, sy, ox, oy, kx, ky);
+			love.graphics.pop();
+		end
+		function text:updateText(text)
+			self.text:setf(text, self.width-(20*2), self.align);
+		end
+		return text;
+	end,
+	["libs.gui.mixins.LayeredGuiTileMap"] = function()
+		local LayeredTileMapMixin = {		};
+		function LayeredTileMapMixin:initLayeredTileMap(map)
+			self.map = map;
+			self.debug = true;
+		end
+		function LayeredTileMapMixin:update(dt, x, y)
+			
+		end
+		function LayeredTileMapMixin:setDebug(val)
+			self.debug = val;
+		end
+		local function Array2DSize(arr)
+			local lim = 0;
+			for i = 1, #arr, 1 do
+				if lim<=#arr[(i)] then
+					lim = #arr[(i)];
+				end
+			end
+			return lim;
+		end
+		function LayeredTileMapMixin:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
+			local sx = sx or 1;
+			local sy = sy or 1;
+			self.sx = sx;
+			self.sy = sy;
+			self.rx = rx;
+			self.ry = ry;
+			for i = 1, #self.map.layers, 1 do
+				for y = 1, Array2DSize(self.map.layers[(1)].data), 1 do
+					for x = 1, #self.map.layers[(1)].data, 1 do
+						love.graphics.push();
+						love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
+						self.map.layers[(i)].data[(x)][(y)]:draw(x, y, r, sx, sy, ox, oy, kx, ky, self.debug);
+						love.graphics.pop();
+					end
+				end
+			end
+		end
+		return LayeredTileMapMixin;
 	end,
 	["libs.gui.mixins.Drawable"] = function()
 		local drawable = {		};
@@ -685,67 +1149,6 @@ _modules = {
 		end
 		return TileMapMixin;
 	end,
-	["libs.gui.mixins.Hover"] = function()
-		local hover = {		};
-		function hover:initHover(x, y, width, height)
-			self.x = x;
-			self.y = y;
-			self.width = width;
-			self.height = height;
-		end
-		function hover:containsPoint(x, y)
-			if not x or not y then
-				return false;
-			end
-			point = {
-				x = x, 
-				y = y
-			};
-			return point.x>=self.x and point.x<=self.x+self.width and point.y>=self.y and point.y<=self.y+self.height;
-		end
-		return hover;
-	end,
-	["libs.gui.mixins.LayeredGuiTileMap"] = function()
-		local LayeredTileMapMixin = {		};
-		function LayeredTileMapMixin:initLayeredTileMap(map)
-			self.map = map;
-			self.debug = true;
-		end
-		function LayeredTileMapMixin:update(dt, x, y)
-			
-		end
-		function LayeredTileMapMixin:setDebug(val)
-			self.debug = val;
-		end
-		local function Array2DSize(arr)
-			local lim = 0;
-			for i = 1, #arr, 1 do
-				if lim<=#arr[(i)] then
-					lim = #arr[(i)];
-				end
-			end
-			return lim;
-		end
-		function LayeredTileMapMixin:draw(rx, ry, r, sx, sy, ox, oy, kx, ky)
-			local sx = sx or 1;
-			local sy = sy or 1;
-			self.sx = sx;
-			self.sy = sy;
-			self.rx = rx;
-			self.ry = ry;
-			for i = 1, #self.map.layers, 1 do
-				for y = 1, Array2DSize(self.map.layers[(1)].data), 1 do
-					for x = 1, #self.map.layers[(1)].data, 1 do
-						love.graphics.push();
-						love.graphics.translate(((x-0.5)*24*sx)+rx, ((y-0.5)*24*sy)+ry);
-						self.map.layers[(i)].data[(x)][(y)]:draw(x, y, r, sx, sy, ox, oy, kx, ky, self.debug);
-						love.graphics.pop();
-					end
-				end
-			end
-		end
-		return LayeredTileMapMixin;
-	end,
 	["libs.gui.mixins.Rectangle"] = function()
 		local rectangle = {		};
 		local drawable = import("libs.gui.mixins.Drawable");
@@ -809,40 +1212,23 @@ _modules = {
 		end
 		return rectangle;
 	end,
-	["libs.gui.mixins.Text"] = function()
-		local text = {		};
-		local fontCache = import("libs.gui.subsystems.FontCache");
-		function text:initText(fontsize, width, height, text, align)
-			self.fontsize = fontsize;
-			self.align = align or "left";
-			self.width = width;
-			self.height = height;
-			self.font = fontCache:getFont(fontsize);
-			self.text = love.graphics.newText(self.font);
-			self.textCanvas = love.graphics.newCanvas(self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
-			self.text:setf(text, width-(20*2), self.align);
+	["libs.gui.subsystems.FontCache"] = function()
+		local fontCache = {		};
+		fontCache[(12)] = love.graphics.newFont(12);
+		fontCache[(14)] = love.graphics.newFont(14);
+		local backgroundColor = {
+			0.2, 
+			0.2, 
+			0.2, 
+			1
+		};
+		function fontCache:getFont(num)
+			if (not fontCache[(num)]) then
+				fontCache[(num)] = love.graphics.newFont(num);
+			end
+			return fontCache[(num)];
 		end
-		function text:drawText(x, y, r, sx, sy, ox, oy, kx, ky)
-			x = x or 0;
-			y = y or 0;
-			local oldCanvas = love.graphics.getCanvas();
-			love.graphics.setCanvas(self.textCanvas);
-			love.graphics.clear();
-			local a, b, c, d = love.graphics.getScissor();
-			love.graphics.setScissor(0, 0, self.width-(20*2), math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight());
-			love.graphics.draw(self.text);
-			love.graphics.setScissor(a, b, c, d);
-			love.graphics.setCanvas(oldCanvas);
-			love.graphics.push();
-			love.graphics.translate(self.x+x+20+(self.width-(20*2))/2, self.y+y+20+(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2);
-			love.graphics.scale(self.sx, self.sy);
-			love.graphics.draw(self.textCanvas, -(self.width-(20*2))/2, -(math.floor((self.height-(20*2))/self.font:getHeight())*self.font:getHeight())/2, r, sx, sy, ox, oy, kx, ky);
-			love.graphics.pop();
-		end
-		function text:updateText(text)
-			self.text:setf(text, self.width-(20*2), self.align);
-		end
-		return text;
+		return fontCache;
 	end,
 	["libs.gui.subsystems.ClickCache"] = function()
 		local clickCache = {		};
@@ -865,79 +1251,12 @@ _modules = {
 		end;
 		return out;
 	end,
-	["libs.gui.subsystems.FontCache"] = function()
-		local fontCache = {		};
-		fontCache[(12)] = love.graphics.newFont(12);
-		fontCache[(14)] = love.graphics.newFont(14);
-		local backgroundColor = {
-			0.2, 
-			0.2, 
-			0.2, 
-			1
-		};
-		function fontCache:getFont(num)
-			if (not fontCache[(num)]) then
-				fontCache[(num)] = love.graphics.newFont(num);
-			end
-			return fontCache[(num)];
-		end
-		return fontCache;
-	end,
-	["libs.Item"] = function()
-		Class = require("libs.class");
-		log = import("libs.log");
-		dump = require("libs.dump");
-		local json = require("libs.json");
-		local Item = Class("Item");
-		local Weapon = nil;
-		local GameData = import("libs.GameData");
-		Item.id = "";
-		Item.type = "Item";
-		Item.prefix = "Default";
-		Item.name = "New Item";
-		Item.quad = nil;
-		function Item.loadSubclasses()
-			log.custom("ITEM", "Loading Subclasses:");
-			Weapon = import("libs.Weapon");
-			log.custom("ITEM", "All Subclasses Loaded. ");
-		end
-		function Item.getName(item)
-			return GameData[(item.prefix)].Items[(item.id)].name_en;
-		end
-		function Item.handle(item, data)
-			item.prefix = data.prefix;
-			item.id = data.id;
-			item.type = GameData[(item.prefix)].Items[(item.id)].type;
-			item.name = item:getName();
-			return item;
-		end
-		function Item.fromJSON(data)
-			if type(data)~="string" then
-				error("Not a string.");
-			end
-			local dataInTable = json.decode(data);
-			local type = GameData[(dataInTable.prefix)].Items[(dataInTable.id)].type;
-			if (type=="Item") then
-				local newItem = Item:new();
-				return Item.handle(newItem, dataInTable);
-			elseif (type=="Weapon") then
-				local newWeapon = Weapon:new();
-				Item.handle(newWeapon, dataInTable);
-				return Weapon.handle(newWeapon, dataInTable.WeaponData);
-			end
-		end
-		function Item:toJSON()
-			local data = {			};
-			data.id = self.id;
-			data.prefix = self.prefix;
-			if self.type=="Weapon" then
-				data.WeaponData = {				};
-				data.WeaponData.sharpened = self.sharpened;
-			end
-			return json.encode(data);
-		end
-		log.custom("ITEM", "Initial Log Complete");
-		return Item;
+	["libs.gui.gui"] = function()
+		local out = {		};
+		out.register = function(name, class)
+			out[(name)] = class;
+		end;
+		return out;
 	end,
 	["libs.LayeredTileMap"] = function()
 		local Tile = import("libs.tile");
@@ -994,6 +1313,12 @@ _modules = {
 	end,
 	["libs.log"] = function()
 		local function Log(level, msg)
+			if (type(level)~=string) then
+				error("Invalid Argument #1 level: Expected Type String, Got Type: "..type(level));
+			end
+			if (type(msg)~=string) then
+				error("Invalid Argument #2 msg: Expected Type String, Got Type: "..type(msg));
+			end
 			print("["..level.."] "..msg);
 		end
 		log = {		};
@@ -1012,114 +1337,6 @@ _modules = {
 		log.custom = Log;
 		log.custom("LOG", "Loaded");
 		return log;
-	end,
-	["libs.tile"] = function()
-		Class = require("libs.class");
-		log = import("libs.log");
-		json = require("libs.json");
-		local Tile = Class("Tile");
-		local GameData = nil;
-		Tile.sx = 1;
-		Tile.sy = 1;
-		Tile.type = "Basic_Tile";
-		Tile.prefix = "Default";
-		Tile.id = "Default";
-		Tile.tileset = "DefaultTileset";
-		Tile.tilesetPrefix = "Default";
-		function Tile:initialize()
-			self.sx = 1;
-			self.sy = 1;
-		end
-		function Tile.loadGameData()
-			GameData = import("libs.GameData");
-		end
-		function Tile:getQuad()
-			return GameData[(self.tilesetPrefix)].Tiles[(self.tileset)][(self.id)].quad;
-		end
-		function Tile:getCollision()
-			return GameData[(self.tilesetPrefix)].Tiles[(self.tileset)][(self.id)].collision;
-		end
-		function Tile:getTileset()
-			return GameData[(self.prefix)].Images[(self.tileset)];
-		end
-		function Tile:isEmpty()
-			return self.id=="Empty" or self.id=="EmptyCollider";
-		end
-		function Tile:draw(x, y, r, sx, sy, ox, oy, kx, ky, debug)
-			if (not self:isEmpty() and not debug) then
-				love.graphics.draw(self:getTileset(), self:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
-			elseif (self:isEmpty() and debug) then
-				local oldColor = {
-					love.graphics.getColor()
-				};
-				if (self.id=="EmptyCollider") then
-					love.graphics.setColor(1, 0, 0, 0.5);
-				else
-					love.graphics.setColor(0, 1, 0, 0.5);
-				end
-				love.graphics.rectangle("fill", -12*sx, -12*sx, 24*sx, 24*sx);
-				love.graphics.setColor(0, 0, 0, 0.5);
-				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
-				love.graphics.setColor(oldColor);
-			else
-				love.graphics.draw(self:getTileset(), self:getQuad(), -12*sx, -12*sx, r, sx, sy, ox, oy, kx, ky);
-				local oldColor = {
-					love.graphics.getColor()
-				};
-				love.graphics.setColor(0, 0, 0, 0.5);
-				love.graphics.rectangle("line", -12*sx, -12*sx, 24*sx, 24*sx);
-				love.graphics.setColor(oldColor);
-			end
-		end
-		function Tile:cloneTile()
-			local tile = Tile();
-			tile.id = self.id;
-			tile.prefix = self.prefix;
-			tile.type = self.type;
-			tile.tileset = self.tileset;
-			tile.tilesetPrefix = self.tilesetPrefix;
-			return tile;
-		end
-		function Tile:toClue(TileMapName, TileMapPrefix, x, y)
-			local out = "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]=Tile::new()";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['id']='"..self.id.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['prefix']='"..self.prefix.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['type']='"..self.type.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tileset']='"..self.tileset.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tilesetPrefix']='"..self.tilesetPrefix.."'";
-			return out;
-		end
-		function Tile:toLua(TileMapName, TileMapPrefix, x, y)
-			local out = "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]=Tile:new()";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['id']='"..self.id.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['prefix']='"..self.prefix.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['type']='"..self.type.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tileset']='"..self.tileset.."'";
-			out = out .. "\n";
-			out = out .. "GameData['"..TileMapPrefix.."']['TileMaps']['"..TileMapName.."']['data']["..x.."]["..y.."]['tilesetPrefix']='"..self.tilesetPrefix.."'";
-			return out;
-		end
-		function Tile.handle(object, data)
-			self.type = data.type;
-			self.prefix = data.prefix;
-			self.id = data.id;
-		end
-		function Tile.fromJSON(data)
-			if type(data)~="string" then
-				error("Not a string.");
-			end
-			local dataInTable = json.decode(data);
-		end
-		return Tile;
 	end,
 	["libs.TileMap"] = function()
 		local Tile = import("libs.tile");
@@ -1335,161 +1552,6 @@ _modules = {
 			end
 		end
 		return TileMap;
-	end,
-	["libs.util.gamestate"] = function()
-		local gamestate = {		};
-		log = import("libs.log");
-		local currstate = {
-			name = "initialstate"
-		};
-		function gamestate.switch(state)
-			local statename = state.name or "NONAME";
-			local currstatename = currstate.name or "NONAME";
-			log.custom("GAMESTATE", "Switching To State: "..statename.." from state: "..currstatename);
-			if currstate.switchaway then
-				currstate.switchaway();
-			end
-			if state.switchto then
-				state.switchto();
-			end
-			for k, v in pairs(state) do
-				if k~='content' and k~='name' and k~='switchaway' and k~='switchto' and k~='quit' then
-					love[(k)] = v;
-				end
-			end
-			currstate = state;
-		end
-		function gamestate.getStateName()
-			return currstate.name;
-		end
-		log.custom("GAMESTATE", "Loaded");
-		return gamestate;
-	end,
-	["libs.util.Math"] = function()
-		local Class = require("libs.class");
-		local Point2D = Class("Point2D");
-		local Vector2D = Class("Vector2D");
-		Point2D.__eq = function(point1, point2)
-			return point1.x==point2.x and point1.y==point2.y;
-		end;
-		Point2D.__tostring = function(point)
-			return "2D Point: {"..point.x..", "..point.y.."}";
-		end;
-		function Point2D:initialize(x, y)
-			self.x = x;
-			self.y = y;
-		end
-		Vector2D.__eq = function(vector1, vector2)
-			return vector1.x==vector2.x and vector1.y==vector2.y;
-		end;
-		Vector2D.__tostring = function(vector)
-			return "2D Vector: {X "..vector.x..", Y "..vector.y..", Angle (Radians) "..vector:getAngle()..", MAGNITUDE "..vector:getMagnitude().."}";
-		end;
-		function Vector2D:getMagnitude()
-			return (((self.x^2)+(self.y^2))^0.5);
-		end
-		function Vector2D:getAngle()
-			return math.atan2(self.y, self.x);
-		end
-		function Vector2D:initialize(x, y, mode)
-			if (mode=="Polar") then
-				self.x = math.cos(x)*y;
-				self.y = math.sin(x)*y;
-			else
-				self.x = x;
-				self.y = y;
-			end
-		end
-		function Vector2D:apply(vector)
-			return Vector2D(self.x+vector.x, self.y+vector.y);
-		end
-		function Vector2D.fromPoint(point)
-			return Vector2D(point.x, point.y);
-		end
-		function Vector2D:multiply(vector)
-			return Vector2D(self.x*vector.x, self.y*vector.y);
-		end
-		function Vector2D:toPoint()
-			return Point2D.fromVector(self);
-		end
-		function Point2D:distanceToPoint(point)
-			return ((self.x-point.x)^2+(self.y-point.y)^2)^0.5;
-		end
-		function Point2D:toVector()
-			return Vector2D.fromPoint(self);
-		end
-		function Point2D.fromVector(vector)
-			return Point2D(vector.x, vector.y);
-		end
-		function Point2D:rotate(rotation, centerPoint)
-			centerPoint = centerPoint;
-			Point2D(0, 0);
-			local newX = ((self.x-centerPoint.x)*math.cos(rotation)-(self.y-centerPoint.y)*math.sin(rotation))+centerPoint.x;
-			local newX = ((self.xy-centerPoint.x)*math.sin(rotation)+(self.y-centerPoint.y)*math.cos(rotation))+centerPoint.y;
-			return Point2D(newX, newY);
-		end
-		function Point2D:translate(vector)
-			return Point2D(self.x+vector.x, self.y+vector.y);
-		end
-		local negativeVector = Vector2D(-1, -1);
-		function Point2D:scale(scaleVector, centerVector)
-			return self:toVector():apply(centerVector:multiply(negativeVector)):multiply(scaleVector):apply(centerVector):toPoint();
-		end
-		local out = {		};
-		out.Point2D = Point2D;
-		out.Vector2D = Vector2D;
-		return out;
-	end,
-	["libs.util.settings"] = function()
-		local settings = {		};
-		local stgs;
-		return settings;
-	end,
-	["libs.util.util"] = function()
-		log = import("libs.log");
-		log.custom("UTIL", "Loaded");
-		function Test(a, b)
-			return a+b;
-		end
-	end,
-	["libs.util.wait"] = function()
-		local waitTable = {		};
-		log = import("libs.log");
-		local wait = setmetatable({		}, {
-			__call = function(self, seconds, func, args)
-				table.insert(waitTable, {
-					love.timer.getTime()+seconds, 
-					func, 
-					args
-				});
-			end
-		});
-		function wait.update()
-			for k, v in pairs(waitTable) do
-				if love.timer.getTime()>=v[(1)] then
-					if v[(2)] then
-						v[(2)](v[(3)]);
-					end
-					table.remove(waitTable, k);
-				end
-			end
-		end
-		log.custom("WAIT", "Loaded");
-		return wait;
-	end,
-	["libs.Weapon"] = function()
-		Class = require("libs.class");
-		local Item = import("libs.Item");
-		local Weapon = Item:subclass("Weapon");
-		local GameData = import("libs.GameData");
-		Weapon.damage = 0;
-		Weapon.sharpened = false;
-		function Weapon.handle(weapon, data)
-			weapon.damage = GameData[(weapon.prefix)].Items[(weapon.id)].damage;
-			weapon.sharpened = data.sharpened;
-			return weapon;
-		end
-		return Weapon;
 	end,
 	["main"] = function()
 		mode = import("conf");
@@ -2048,5 +2110,118 @@ _modules = {
 			talkies.update(dt);
 		end
 	end,
-	}
-import("main")
+	["assets.DefaultTileset"] = function()
+		local function generateQuad24X(x, y, tileset)
+			return love.graphics.newQuad(1+((x-1)*25), 1+((y-1)*25), 24, 24, tileset);
+		end
+		local TileMap = import("libs.TileMap");
+		local Tile = import("libs.tile");
+		return function(GameData)
+			local canvas = love.graphics.newCanvas(24, 24);
+			GameData.Default.Images.Empty = canvas;
+			love.graphics.setCanvas(canvas);
+			love.graphics.clear(0, 0, 0, 0);
+			love.graphics.setCanvas();
+			local emptyQuad = love.graphics.newQuad(0, 0, 24, 24, canvas);
+			local orderedTable = {			};
+			GameData.Default.Tiles.DefaultTileset = setmetatable({			}, {
+				__newindex = function(tbl, key, value)
+					table.insert(orderedTable, {
+						key, 
+						value
+					});
+					local coll = false;
+					rawset(tbl, key, {
+						quad = value, 
+						collision = coll
+					});
+				end
+			});
+			GameData.Default.Tiles.DefaultTileset.EmptyCollider = emptyQuad;
+			GameData.Default.Tiles.DefaultTileset.Empty = emptyQuad;
+			GameData.Default.Tiles.DefaultTileset.Dirt = generateQuad24X(8, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtULGrassDR = generateQuad24X(2, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtUGrassD = generateQuad24X(3, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtURGrassDL = generateQuad24X(4, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtLGrassR = generateQuad24X(2, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtRGrassL = generateQuad24X(4, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDLGrassUR = generateQuad24X(2, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDGrassU = generateQuad24X(3, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDRGrassUL = generateQuad24X(4, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtULDarkDR = generateQuad24X(2, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtUDarkD = generateQuad24X(3, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtURDarkDL = generateQuad24X(4, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtLDarkR = generateQuad24X(2, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtRDarkL = generateQuad24X(4, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDLDarkUR = generateQuad24X(2, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDDarkU = generateQuad24X(3, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DirtDRDarkUL = generateQuad24X(4, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.Dark = generateQuad24X(3, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkULGrassDR = generateQuad24X(2, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkUGrassD = generateQuad24X(3, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkURGrassDL = generateQuad24X(4, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkLGrassR = generateQuad24X(2, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkRGrassL = generateQuad24X(4, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDLGrassUR = generateQuad24X(2, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDGrassU = generateQuad24X(3, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDRGrassUL = generateQuad24X(4, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.Grass = generateQuad24X(3, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassULDirtDR = generateQuad24X(2+5, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassUDirtD = generateQuad24X(3+5, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassURDirtDL = generateQuad24X(4+5, 2, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassLDirtR = generateQuad24X(2+5, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassRDirtL = generateQuad24X(4+5, 3, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDLDirtUR = generateQuad24X(2+5, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDDirtU = generateQuad24X(3+5, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDRDirtUL = generateQuad24X(4+5, 4, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkULDirtDR = generateQuad24X(12-5, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkUDirtD = generateQuad24X(13-5, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkURDirtDL = generateQuad24X(14-5, 7, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkLDirtR = generateQuad24X(12-5, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkRDirtL = generateQuad24X(14-5, 8, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDLDirtUR = generateQuad24X(12-5, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDDirtU = generateQuad24X(13-5, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.DarkDRDirtUL = generateQuad24X(14-5, 9, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassULDarkDR = generateQuad24X(2+5, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassUDarkD = generateQuad24X(3+5, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassURDarkDL = generateQuad24X(4+5, 7+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassLDarkR = generateQuad24X(2+5, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassRDarkL = generateQuad24X(4+5, 8+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDLDarkUR = generateQuad24X(2+5, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDDarkU = generateQuad24X(3+5, 9+5, GameData.Default.Images.DefaultTileset);
+			GameData.Default.Tiles.DefaultTileset.GrassDRDarkUL = generateQuad24X(4+5, 9+5, GameData.Default.Images.DefaultTileset);
+			rawset(GameData.Default.Tiles.DefaultTileset, "EmptyCollider", {
+				quad = emptyQuad, 
+				collision = true
+			});
+			rawset(GameData.Default.Tiles.DefaultTileset, "Empty", {
+				quad = emptyQuad, 
+				collision = false
+			});
+			local out = {			};
+			for k, v in ipairs(orderedTable) do
+				local t = Tile();
+				t.sx = 1;
+				t.sy = 1;
+				t.id = v[(1)];
+				t.prefix = "Default";
+				if (v[(2)]==emptyQuad) then
+					t.tileset = "DefaultTileset";
+					t.type = "Utility_Tile";
+				else
+					t.type = "Basic_Tile";
+					t.tileset = "DefaultTileset";
+				end
+				t.tilesetPrefix = "Default";
+				table.insert(out, t);
+			end
+			GameData.Default.TileMaps.DefaultTileset = TileMap.fromTable(out);
+			GameData.Default.TileMaps.DefaultTileset.name = "DefaultTileset";
+		end;
+	end,
+}
+if _modules["main"] then
+	import("main")
+else
+	error("File \"main.clue\" was not found!")
+end
