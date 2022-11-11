@@ -52,6 +52,7 @@ local fn loadLibraries () {
             GUI.register("GUI", import("libs.gui.elements.Wrapper"))
             GUI.register("BasicLayeredTileMap", import("libs.gui.elements.BasicLayeredTileMap"))
             GUI.register("HoverTextBox", import("libs.gui.elements.HoverTextBox"))
+            GUI.register("ScrollableArea", import("libs.gui.elements.ScrollableArea"))
 
 }
 method love.resize(w, h) {
@@ -184,7 +185,8 @@ if (mode=="editor") {
         if (!playing.switched) {
             local self = playing
             self.gui=GUI.GUI()
-
+            self.scrollable=GUI.ScrollableArea(0, 0, 100, 100, 300, 300, 0, 0)
+            self.scrollable::add(GUI.TextBoxButton(50, 50, {1, 0, 1, 1}, 100, 100, 36, "Testing", true))
             self.layeredMap=main.layeredMap
 
             self.button=
@@ -273,6 +275,8 @@ if (love.system.getOS()=="Android") {
                 x+=24
             }
             }
+            playing.scrollable::scroll(x*dt, y*dt)
+            
             player.ttx, player.tty = world::move(player, player.ttx+ (x*dt), player.tty+ (y*dt), whatCollider)
             wait.update()
                        local x, y = love.mouse.getPosition()
@@ -286,11 +290,14 @@ if (love.system.getOS()=="Android") {
                        local x=x || -1
                        local y=y || -1
             playing.gui::update(dt, x, y)
+            playing::update(dt, x, y)
        }
        method playing.draw() {
        push::start()
         playing.gui::background()
+        
                    playing.gui::draw()
+                   playing.scrollable::draw()
         love.graphics.rectangle("fill", player.ttx*2, 2*player.tty+100, 48, 48)
         push::finish()
        }

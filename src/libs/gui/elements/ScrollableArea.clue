@@ -16,7 +16,10 @@ method ScrollableArea::initialize(x, y, width, height, true_width, true_height, 
     self.children={}
 }
 
-
+method ScrollableArea::add(child) {
+    table.insert(self.children, child)
+    return #self.children
+}
 method ScrollableArea::drawStart() {
     self.oldCanvas=love.graphics.getCanvas()
     love.graphics.setCanvas(self.canvas)

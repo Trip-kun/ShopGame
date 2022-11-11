@@ -732,6 +732,10 @@ _modules = {
 			self.offsetY = start_offset_y or 0;
 			self.children = {			};
 		end
+		function ScrollableArea:add(child)
+			table.insert(self.children, child);
+			return #self.children;
+		end
 		function ScrollableArea:drawStart()
 			self.oldCanvas = love.graphics.getCanvas();
 			love.graphics.setCanvas(self.canvas);
@@ -1617,6 +1621,7 @@ _modules = {
 			GUI.register("GUI", import("libs.gui.elements.Wrapper"));
 			GUI.register("BasicLayeredTileMap", import("libs.gui.elements.BasicLayeredTileMap"));
 			GUI.register("HoverTextBox", import("libs.gui.elements.HoverTextBox"));
+			GUI.register("ScrollableArea", import("libs.gui.elements.ScrollableArea"));
 		end
 		function love.resize(w, h)
 			push.resize(w, h);
@@ -1763,6 +1768,13 @@ _modules = {
 				if (not playing.switched) then
 					local self = playing;
 					self.gui = GUI.GUI();
+					self.scrollable = GUI.ScrollableArea(0, 0, 100, 100, 300, 300, 0, 0);
+					self.scrollable:add(GUI.TextBoxButton(50, 50, {
+						1, 
+						0, 
+						1, 
+						1
+					}, 100, 100, 36, "Testing", true));
 					self.layeredMap = main.layeredMap;
 					self.button = GUI.TextBoxButton(240*2, 0, {
 						0, 
@@ -1866,6 +1878,7 @@ _modules = {
 						x = x + 24;
 					end
 				end
+				playing.scrollable:scroll(x*dt, y*dt);
 				player.ttx, player.tty = world:move(player, player.ttx+(x*dt), player.tty+(y*dt), whatCollider);
 				wait.update();
 				local x, y = love.mouse.getPosition();
@@ -1879,11 +1892,13 @@ _modules = {
 				local x = x or -1;
 				local y = y or -1;
 				playing.gui:update(dt, x, y);
+				playing:update(dt, x, y);
 			end
 			function playing.draw()
 				push:start();
 				playing.gui:background();
 				playing.gui:draw();
+				playing.scrollable:draw();
 				love.graphics.rectangle("fill", player.ttx*2, 2*player.tty+100, 48, 48);
 				push:finish();
 			end
