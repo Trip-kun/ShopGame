@@ -12,13 +12,13 @@ set FF=%TIME:~9,2%
 set dirName=%YYYY%%MM%%DD%
 set fileName=%YYYY%%MM%%DD%_%HH%%MI%%SS%
 
-cd /d C:\Users\Triplapeeck\ClueSidescroller\
+cd /d C:\Users\Trip-kun\IdeaProjects\ShopGame\
 echo %fileName%
 clue --continue luajit -j bit ./src/
-cd /d C:\Users\Triplapeeck\ClueSidescroller\out\
-cd /d C:\Users\Triplapeeck\ClueSidescroller\
+cd /d C:\Users\Trip-kun\IdeaProjects\ShopGame\out\
+cd /d C:\Users\Trip-kun\IdeaProjects\ShopGame\
 cp ./src/main.lua ./lua_out/
 cp ./src/conf.lua ./lua_out/
 rm ./src/main.lua
-cd /d C:\Users\Triplapeeck\ClueSidescroller\lua_out\
-7z a -tzip -r C:\Users\Triplapeeck\ClueSidescroller\out\%fileName%.love ./*
+cd /d C:\Users\Trip-kun\IdeaProjects\ShopGame\lua_out\
+7z a -tzip -r C:\Users\Trip-kun\IdeaProjects\ShopGame\out\%fileName%.love ./*
